@@ -11,11 +11,10 @@ import org.rhm.stock.controller.dto.TickerInfo;
 import org.rhm.stock.domain.IbdStatistic;
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.domain.StockTicker;
-import org.rhm.stock.dto.FinanceProfile;
 import org.rhm.stock.handler.ticker.ExcelTransformer;
 import org.rhm.stock.handler.ticker.ExcelTransformerResponse;
 import org.rhm.stock.io.CboeWeekly;
-import org.rhm.stock.io.YahooDownload;
+import org.rhm.stock.io.CompanyInfoDownload;
 import org.rhm.stock.repository.IbdStatisticRepo;
 import org.rhm.stock.repository.PriceRepo;
 import org.rhm.stock.repository.TickerRepo;
@@ -32,11 +31,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TickerService {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(TickerService.class);
 	@Autowired
 	private TickerRepo tickerRepo = null;
-	@Autowired
-	private YahooDownload download = null;
 	@Autowired
 	private ExcelTransformer excel = null;
 	@Autowired
@@ -45,25 +42,25 @@ public class TickerService {
 	private PriceRepo priceRepo = null;
 	@Autowired
 	private CboeWeekly cboeWeekly;
-	private Logger logger = LoggerFactory.getLogger(TickerService.class);
+	@Autowired
+	private CompanyInfoDownload companyInfoDownload;
 	public String createTicker(String tickerSymbol) {
 		StockTicker stockTicker = null;
 		String message = null;
-		Map<String, Object> companyInfo = download.retrieveProfile(tickerSymbol);
-		if (companyInfo == null) {
-			message = "Unable to find " + tickerSymbol + " in Yahoo Finance";
+		Map<String,Object> companyInfo = this.companyInfoDownload.retrieveProfile(tickerSymbol);
+		if (companyInfo.get("companyName") == null) {
+			message = String.format("%s: %s", tickerSymbol, companyInfo.get("message"));
 		}
 		else {
 			if (tickerRepo.existsById(tickerSymbol)) {
 				message = "Ticker " + tickerSymbol + " already exists";
 			}
 			else {
-				FinanceProfile profile = new FinanceProfile(companyInfo);
 				stockTicker = new StockTicker();
 				stockTicker.setTickerSymbol(tickerSymbol);
-				stockTicker.setCompanyName(profile.getLongName());
-				stockTicker.setIndustryName(profile.getIndustry());
-				stockTicker.setSectorName(profile.getSector());
+				stockTicker.setCompanyName((String) companyInfo.get("companyName"));
+				stockTicker.setIndustryName((String) companyInfo.get("industry"));
+				stockTicker.setSectorName((String) companyInfo.get("sector"));
 				if (tickerRepo.insert(stockTicker) != null) {
 					message = tickerSymbol + "/" + stockTicker.getCompanyName() + " was successfully created";
 				}
@@ -85,7 +82,7 @@ public class TickerService {
 		int tickersSavedCnt = 0;
 		String status = null;
 		for (TickerInfo info: tickerList) {
-			status = this.createTicker(info.getTickerSymbol(), info.getCompanyName());
+			status = this.createTicker(info);
 			if (status.contains("successfully created")) {
 				tickersSavedCnt++;
 			}
@@ -93,24 +90,25 @@ public class TickerService {
 		return tickersSavedCnt;
 	}
 	
-	public String createTicker(String tickerSymbol, String companyName) {
+	public String createTicker(TickerInfo tickerInfo) {
 		String message = null;
 		StockTicker stockTicker = null;
-		if (tickerRepo.existsById(tickerSymbol)) {
-			message = "Ticker " + tickerSymbol + " already exists";
+		if (tickerRepo.existsById(tickerInfo.getTickerSymbol())) {
+			message = String.format("Ticker %s already exists", tickerInfo.getTickerSymbol());
 		}
 		else {
 			stockTicker = new StockTicker();
-			stockTicker.setTickerSymbol(tickerSymbol);
-			stockTicker.setCompanyName(companyName);
+			stockTicker.setTickerSymbol(tickerInfo.getTickerSymbol());
+			stockTicker.setCompanyName(tickerInfo.getCompanyName());
+			stockTicker.setIndustryName(tickerInfo.getIndustry());
+			stockTicker.setSectorName(tickerInfo.getSector());
 			if (tickerRepo.insert(stockTicker) != null) {
-				message = tickerSymbol + "/" + stockTicker.getCompanyName() + " was successfully created";
+				message = String.format("%s/%s was successfully created", stockTicker.getTickerSymbol(), stockTicker.getCompanyName());
 			}
 			else {
-				message = "Failed to create entry for " + tickerSymbol;
+				message = String.format("Failed to create entry for %s", tickerInfo.getTickerSymbol());
 			}
 		}
-		
 		return message;
 	}
 	
@@ -130,14 +128,16 @@ public class TickerService {
 		ExcelTransformerResponse response = excel.extractTickerSymbols(workbookBytes);
 		List<IbdStatistic> ibdStatList = response.getIbdStatList();
 		List<String> tickerList = response.getTickerSymbols();
-		FinanceProfile profile = null;
+		Map<String,Object> profile = null;
 		TickerInfo ticker = null;
 		for (String tickerSymbol: tickerList) {
 			profile = this.findCompanyProfile(tickerSymbol);
 			ticker = new TickerInfo();
 			ticker.setTickerSymbol(tickerSymbol);
 			if (profile != null) {
-				ticker.setCompanyName(profile.getLongName());
+				ticker.setCompanyName((String) profile.get("companyName"));
+				ticker.setIndustry((String)profile.get("industry"));
+				ticker.setSector((String)profile.get("sector"));
 				if (this.tickerExists(tickerSymbol)) {
 					ticker.setStatus("Ticker already exists; will not be created"); 
 				}
@@ -146,7 +146,7 @@ public class TickerService {
 				}
 			}
 			else {
-				logger.info("retrieveTickerInfo - ticker " + tickerSymbol + " was not found in Yahoo Finance");
+				LOGGER.info("retrieveTickerInfo - ticker " + tickerSymbol + " was not found in Yahoo Finance");
 				ticker.setCompanyName(this.findCompanyName(ibdStatList, tickerSymbol));
 				if (ticker.getCompanyName() != null) {
 					if (this.tickerExists(tickerSymbol)) {
@@ -161,7 +161,7 @@ public class TickerService {
 				}
 			}
 			tickerInfoList.add(ticker);
-			logger.info("retrieveTickerInfo - " + ticker.getTickerSymbol() + ":" + ticker.getStatus());
+			LOGGER.info("retrieveTickerInfo - " + ticker.getTickerSymbol() + ":" + ticker.getStatus());
 		}
 		this.loadIbdStatistics(response.getIbdStatList(), response.getListName());
 		return tickerInfoList.stream()
@@ -171,7 +171,7 @@ public class TickerService {
 	
 	private void loadIbdStatistics(List<IbdStatistic> ibdStatList, String listName) {
 		List<StockPrice> priceList = null;
-		logger.info(String.format("loadIbdStatistics - loading %s IBD stats", ibdStatList.size()) );
+		LOGGER.info(String.format("loadIbdStatistics - loading %s IBD stats", ibdStatList.size()) );
 		IbdStatistic mrIbdStat = null;
 		for (IbdStatistic ibdStat: ibdStatList) {
 			mrIbdStat = ibdRepo.findTopByTickerSymbolOrderByPriceDateDesc(ibdStat.getTickerSymbol());
@@ -194,32 +194,32 @@ public class TickerService {
 					this.createIbdStat(ibdStat, price.getPriceId(), price.getPriceDate());
 				}
 				else {
-					logger.info("loadIbdStatistics - new IBD stat ticker: " + ibdStat.getTickerSymbol());
+					LOGGER.info("loadIbdStatistics - new IBD stat ticker: " + ibdStat.getTickerSymbol());
 				}
 			}
 		}
 	}
 
 	private void createIbdStat(IbdStatistic ibdStat, String priceId, Date priceDate) {
-		logger.info("createIbdStat - priceId: " + priceId);
+		LOGGER.info("createIbdStat - priceId: " + priceId);
 		Optional<IbdStatistic> existingStat = ibdRepo.findById(priceId);
 		if (existingStat.isPresent()) {
-			logger.info("createIbdStat - found existing IBD stat");
+			LOGGER.info("createIbdStat - found existing IBD stat");
 			List<String> newListNames = ibdStat.getListName();
-			logger.info("createIbdStat - list count: " + newListNames.size());
+			LOGGER.info("createIbdStat - list count: " + newListNames.size());
 			for (String list: existingStat.get().getListName()) {
 				if (!newListNames.contains(list)) {
 					newListNames.add(list);
 				}
 			}
-			logger.info("createIbdStat - list count after adding existing: " + newListNames.size());
+			LOGGER.info("createIbdStat - list count after adding existing: " + newListNames.size());
 			ibdStat.setListName(newListNames);
 			if (ibdStat.getListName().size() > 1) {
-				logger.info("createIbdStat - " + priceId + " is on multiple IBD lists");
+				LOGGER.info("createIbdStat - " + priceId + " is on multiple IBD lists");
 			}
 		}
 		else {
-			logger.info("createIbdStat - no existing IBD stat for " + priceId);
+			LOGGER.info("createIbdStat - no existing IBD stat for " + priceId);
 		}
 		ibdStat.setStatId(priceId);
 		ibdStat.setPriceDate(priceDate);
@@ -232,13 +232,9 @@ public class TickerService {
 		return exists;
 	}
 	
-	public FinanceProfile findCompanyProfile(String tickerSymbol) {
-//		Map<String,Object> profile = download.retrieveProfile(tickerSymbol);
-		FinanceProfile fp = null;
-//		if (profile != null) {
-//			fp = new FinanceProfile(profile);
-//		}
-		return fp;
+	public Map<String,Object> findCompanyProfile(String tickerSymbol) {
+		Map<String,Object> profile = this.companyInfoDownload.retrieveProfile(tickerSymbol);
+		return profile;
 	}
 
 	public Page<StockTicker> findPage(Pageable pageable) {

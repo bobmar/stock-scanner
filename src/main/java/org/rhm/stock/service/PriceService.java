@@ -33,9 +33,10 @@ public class PriceService {
 	public List<StockPrice> retrieveSourcePrices(String tickerSymbol, int days) {
 		List<PriceBean> priceBeanList = priceDownloader.downloadPrices(tickerSymbol, days);
 		List<StockPrice> priceList = new ArrayList<StockPrice>();
+		logger.debug("retrieveSourcePrices - transforming price beans");
 		for (PriceBean bean: priceBeanList) {
 			StockPrice price = new StockPrice();
-			price.setPriceId(tickerSymbol + ":" + dtFmt.format(bean.getDate()));
+			price.setPriceId(String.format("%s:%s", tickerSymbol, dtFmt.format(bean.getDate())));
 			price.setClosePrice(bean.getClosePrice());
 			price.setHighPrice(bean.getHighPrice());
 			price.setLowPrice(bean.getLowPrice());
@@ -45,6 +46,7 @@ public class PriceService {
 			price.setVolume(bean.getVolume());
 			priceList.add(price);
 		}
+		logger.debug("retrieveSourcePrices - returning StockPrice entries");
 		return priceList;
 	}
 	

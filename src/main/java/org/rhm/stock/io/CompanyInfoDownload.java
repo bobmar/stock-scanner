@@ -12,6 +12,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -42,20 +43,38 @@ public class CompanyInfoDownload {
         return url;
     }
 
-    public Map<String, Object> retrieveProfile(String tickerSymbol) throws IOException, InterruptedException {
-        Map<String,Object> result = null;
+    public Map<String, Object> retrieveProfile(String tickerSymbol) {
+        List<Map<String,Object>> result = null;
+        Map<String,Object> returnObj = null;
         URI uri = URI.create(this.createProfileUrl(tickerSymbol));
         HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
         HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() == 200) {
-            result = this.mapper.readValue(response.body(), Map.class);
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                try {
+                    result = this.mapper.readValue(response.body(), List.class);
+                    returnObj = result.get(0);
+                } catch (JsonProcessingException e) {
+                    Map<String,Object> errorMsg = new HashMap<>();
+                    errorMsg.put("message", "Failed to parse JSON string");
+                    errorMsg.put("errorCode", String.valueOf(response.statusCode()));
+                    returnObj = errorMsg;
+                }
+            }
+            else {
+                Map<String,Object> errorMsg = new HashMap<>();
+                errorMsg.put("message", response.body());
+                errorMsg.put("errorCode", String.valueOf(response.statusCode()));
+                returnObj = errorMsg;
+            }
+        } catch (IOException | InterruptedException e) {
+            Map<String,Object> errorMsg = new HashMap<>();
+            errorMsg.put("message", e.getMessage());
+            errorMsg.put("errorCode", String.valueOf(response.statusCode()));
+            returnObj = errorMsg;
         }
-        else {
-            result = new HashMap<>();
-            result.put("message", "Failed to retrieve profile");
-            result.put("errorCode", String.valueOf(response.statusCode()));
-        }
-        return result;
+        return returnObj;
     }
 }

@@ -9,7 +9,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpRequest;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -80,18 +82,20 @@ public class YahooPriceDownloader {
 		List<PriceBean> priceDataList = new ArrayList<PriceBean>();
 		String urlStr = formatUrl(tickerSymbol, fromCal, toCal);
 		PriceBean priceData = null;
-		logger.debug("URL string: " + urlStr);
+		logger.debug("downloadPrices - URL string: " + urlStr);
 		try {
 			URL url = new URL(urlStr);
-			logger.debug("Query:" + url.getQuery());
+			logger.debug("downloadPrices - Query:" + url.getQuery());
 			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 			conn.addRequestProperty("Cookie", COOKIE);
-			logger.debug("Response: " + conn.getResponseMessage());
+			logger.debug("downloadPrices - Response: " + conn.getResponseMessage());
 			InputStream is = conn.getInputStream();
 			InputStreamReader reader = new InputStreamReader(is);
 			BufferedReader in = new BufferedReader(reader);
 			String s = null;
+			logger.debug("downloadPrices - Processing CSV lines");
 			while ((s = in.readLine()) != null) {
+				logger.debug("downloadPrices - {}", s);
 				priceData = new PriceBean(s);
 				if (priceData.isDataLoaded()) {
 					priceDataList.add(priceData);
@@ -100,10 +104,10 @@ public class YahooPriceDownloader {
 					if (!s.startsWith("Date,Open,High,Low,Close")) {
 						logger.warn("downloadPrices - [" + tickerSymbol + "] unable to parse: " + s);
 					}
-
 				}
 			}
 			in.close();
+			logger.debug("downloadPrices - closed input stream");
 		} 
 		catch (MalformedURLException e) {
 			logger.error("downloadPrices - MalformedURLException: " + e.getMessage());
@@ -113,7 +117,53 @@ public class YahooPriceDownloader {
 		}
 		return priceDataList;
 	}
-	
+
+	public List<PriceBean> retrievePriceData(String tickerSymbol, Integer histDays) {
+		Calendar toCal = Calendar.getInstance();
+		Calendar fromCal = Calendar.getInstance();
+		fromCal.add(Calendar.DAY_OF_MONTH, histDays * -1);
+		List<PriceBean> priceDataList = new ArrayList<PriceBean>();
+		String urlStr = formatUrl(tickerSymbol, fromCal, toCal);
+		PriceBean priceData = null;
+		logger.debug("URL string: " + urlStr);
+//		try {
+//			URL url = new URL(urlStr);
+			URI uri = URI.create(urlStr);
+			logger.debug("Query:" + uri.getQuery());
+			HttpRequest request = HttpRequest.newBuilder()
+			.uri(uri)
+			.setHeader("Cookie", COOKIE)
+			.GET()
+			.build()
+			;
+//			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+//			conn.addRequestProperty("Cookie", COOKIE);
+//			logger.debug("Response: " + conn.getResponseMessage());
+////			InputStream is = conn.getInputStream();
+////			InputStreamReader reader = new InputStreamReader(is);
+//			BufferedReader in = new BufferedReader(reader);
+//			String s = null;
+//			while ((s = in.readLine()) != null) {
+//				priceData = new PriceBean(s);
+//				if (priceData.isDataLoaded()) {
+//					priceDataList.add(priceData);
+//				}
+//				else {
+//					if (!s.startsWith("Date,Open,High,Low,Close")) {
+//						logger.warn("downloadPrices - [" + tickerSymbol + "] unable to parse: " + s);
+//					}
+//
+//				}
+//			}
+//			in.close();
+//		}
+//		catch (IOException e) {
+//			logger.error("downloadPrices - IOException: " + e.getMessage());
+//		}
+		return priceDataList;
+
+	}
+
 	private String millisecondStr(Calendar cal) {
 		String str = String.valueOf(cal.getTimeInMillis());
 		return str.substring(0, str.length() - 3);

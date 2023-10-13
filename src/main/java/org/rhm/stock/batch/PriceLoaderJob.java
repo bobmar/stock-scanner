@@ -46,16 +46,16 @@ public class PriceLoaderJob implements BatchJob {
 		if (cnt < days) {
 			days = 540;
 		}
-		logger.info("processTicker - retrieve prices for " + tickerSymbol);
+		logger.info("processTicker - retrieve prices for {}", tickerSymbol);
 		List<StockPrice> priceList = priceSvc.retrieveSourcePrices(tickerSymbol, days);
-		logger.debug("processTicker - found " + priceList.size() + " prices for " + tickerSymbol);
+		logger.debug("processTicker - found {} prices for {}", priceList.size(), tickerSymbol);
 		Date mostRecentPriceDate = null;
 		if (priceList != null && priceList.size() > 0) {
 			if (priceSvc.saveStockPrice(priceList) != null) {
 				success = true;
 				mostRecentPriceDate = findMostRecentPriceDate(priceList);
-				logger.info("processTicker - " + tickerSymbol + " saved " + priceList.size() + " prices");
-				logger.info("processTicker - " + tickerSymbol + " latest price date: " + mostRecentPriceDate);
+				logger.info("processTicker - {} saved {} prices", tickerSymbol, priceList.size());
+				logger.info("processTicker - {} latest price date: {}", tickerSymbol, mostRecentPriceDate);
 			}
 			if (oldestAcceptableDate.compareTo(mostRecentPriceDate) == 1) {
 				logger.warn("processTicker - ** most recent price is " + mostRecentPriceDate + "/oldest acceptable is " + oldestAcceptableDate + "; will delete ticker");
@@ -63,7 +63,7 @@ public class PriceLoaderJob implements BatchJob {
 			}
 		}
 		else {
-			logger.error("processTicker - " + tickerSymbol + " error during price download");
+			logger.error("processTicker - {} error during price download", tickerSymbol);
 			tickerSvc.deleteTicker(tickerSymbol);
 		}
 		return success;
@@ -75,6 +75,10 @@ public class PriceLoaderJob implements BatchJob {
 		for (StockTicker ticker: tickerList) {
 			if (this.processTicker(ticker.getTickerSymbol())) {
 				tickerCnt++;
+				if (tickerCnt > 10 && tickerCnt % 10 == 0) {
+					logger.info("processTickers - tickers processed: {}; max mem: {}, free mem: {}", tickerCnt, Runtime.getRuntime().maxMemory(), Runtime.getRuntime().freeMemory());
+					System.gc();
+				}
 			}
 		}
 		if (tickerCnt == tickerList.size()) {
