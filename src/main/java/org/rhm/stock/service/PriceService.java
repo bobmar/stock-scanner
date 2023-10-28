@@ -31,7 +31,7 @@ public class PriceService {
 	private DateFormat dtFmt = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public List<StockPrice> retrieveSourcePrices(String tickerSymbol, int days) {
-		List<PriceBean> priceBeanList = priceDownloader.downloadPrices(tickerSymbol, days);
+		List<PriceBean> priceBeanList = priceDownloader.retrievePriceData(tickerSymbol, days);
 		List<StockPrice> priceList = new ArrayList<StockPrice>();
 		logger.debug("retrieveSourcePrices - transforming price beans");
 		for (PriceBean bean: priceBeanList) {

@@ -11,7 +11,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -126,8 +128,7 @@ public class YahooPriceDownloader {
 		String urlStr = formatUrl(tickerSymbol, fromCal, toCal);
 		PriceBean priceData = null;
 		logger.debug("URL string: " + urlStr);
-//		try {
-//			URL url = new URL(urlStr);
+		try {
 			URI uri = URI.create(urlStr);
 			logger.debug("Query:" + uri.getQuery());
 			HttpRequest request = HttpRequest.newBuilder()
@@ -136,30 +137,30 @@ public class YahooPriceDownloader {
 			.GET()
 			.build()
 			;
-//			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-//			conn.addRequestProperty("Cookie", COOKIE);
-//			logger.debug("Response: " + conn.getResponseMessage());
-////			InputStream is = conn.getInputStream();
-////			InputStreamReader reader = new InputStreamReader(is);
-//			BufferedReader in = new BufferedReader(reader);
-//			String s = null;
-//			while ((s = in.readLine()) != null) {
-//				priceData = new PriceBean(s);
-//				if (priceData.isDataLoaded()) {
-//					priceDataList.add(priceData);
-//				}
-//				else {
-//					if (!s.startsWith("Date,Open,High,Low,Close")) {
-//						logger.warn("downloadPrices - [" + tickerSymbol + "] unable to parse: " + s);
-//					}
-//
-//				}
-//			}
-//			in.close();
-//		}
-//		catch (IOException e) {
-//			logger.error("downloadPrices - IOException: " + e.getMessage());
-//		}
+			HttpClient client = HttpClient.newHttpClient();
+			HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+			InputStream is = response.body();
+			InputStreamReader reader = new InputStreamReader(is);
+			BufferedReader in = new BufferedReader(reader);
+			String s = null;
+			while ((s = in.readLine()) != null) {
+				priceData = new PriceBean(s);
+				if (priceData.isDataLoaded()) {
+					priceDataList.add(priceData);
+				}
+				else {
+					if (!s.startsWith("Date,Open,High,Low,Close")) {
+						logger.warn("downloadPrices - [" + tickerSymbol + "] unable to parse: " + s);
+					}
+				}
+			}
+			in.close();
+            is.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 		return priceDataList;
 
 	}
