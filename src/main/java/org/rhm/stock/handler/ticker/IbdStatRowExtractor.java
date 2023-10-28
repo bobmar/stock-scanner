@@ -7,7 +7,7 @@ import org.rhm.stock.domain.IbdStatistic;
 
 public class IbdStatRowExtractor {
 	/*
-	 * Symbol, Company Name, Price, Price Chg., Price % Chg., Volume (000), Volume % Chg., EPS % Chg (Latest Qtr), EPS % Chg (Prior Qtr), Sale % Chg (Last Qtr), EPS Est % Chg (Currrent Qtr), EPS Est % Chg (Current Yr), Composite Rating, EPS Rating, RS Rating, SMR Rating, Acc/Dis Rating, Group Rel Str Rating
+	 * Symbol, Company Name, Price, Price Chg., Price % Chg., Volume (000), Volume % Chg., EPS % Chg (Latest Qtr), EPS % Chg (Prior Qtr), Sale % Chg (Last Qtr), EPS Est % Chg (Current Qtr), EPS Est % Chg (Current Yr), Composite Rating, EPS Rating, RS Rating, SMR Rating, Acc/Dis Rating, Group Rel Str Rating
 	 * Symbol, Company Name, Industry Group Rank, Price, Price Change, Price % Change, % off High, Volume, Volume % Change, Composite Rating, EPS Rating, RS Rating, SMR Rating, ACC/DIS Rating, Group Rel Str Rating, EPS % Change(Latest Qtr), EPS % Change(Prev Qtr), EPS EST % Change(Current Qtr), EPS EST % Change(Current Yr), Sales % Change(Last Qtr), Annual ROE, Annual Profit Margin (Latest Yr), Mgmt Own %, Qtrs of Rising Sponsorship
 	 */
 
