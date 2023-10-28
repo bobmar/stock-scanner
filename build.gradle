@@ -22,6 +22,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
+bootJar {
+	mainClass = 'org.rhm.stock.StockDataLoader'
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
