@@ -55,7 +55,12 @@ public class CompanyInfoDownload {
             if (response.statusCode() == 200) {
                 try {
                     result = this.mapper.readValue(response.body(), List.class);
-                    returnObj = result.get(0);
+                    if (!result.isEmpty()) {
+                        returnObj = result.get(0);
+                    }
+                    else {
+                        returnObj = this.mapper.readValue("{}", Map.class);
+                    }
                 } catch (JsonProcessingException e) {
                     Map<String,Object> errorMsg = new HashMap<>();
                     errorMsg.put("message", "Failed to parse JSON string");

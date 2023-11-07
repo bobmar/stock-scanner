@@ -76,7 +76,7 @@ public class YahooPriceDownloader {
 			e.printStackTrace();
 		}
 	}
-	
+	@Deprecated
 	public List<PriceBean> downloadPrices(String tickerSymbol, Integer histDays) {
 		Calendar toCal = Calendar.getInstance();
 		Calendar fromCal = Calendar.getInstance();
@@ -156,9 +156,7 @@ public class YahooPriceDownloader {
 			}
 			in.close();
             is.close();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException | IOException e) {
 			throw new RuntimeException(e);
 		}
 		return priceDataList;

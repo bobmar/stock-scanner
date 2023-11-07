@@ -131,34 +131,26 @@ public class TickerService {
 		Map<String,Object> profile = null;
 		TickerInfo ticker = null;
 		for (String tickerSymbol: tickerList) {
-			profile = this.findCompanyProfile(tickerSymbol);
 			ticker = new TickerInfo();
 			ticker.setTickerSymbol(tickerSymbol);
-			if (profile != null) {
-				ticker.setCompanyName((String) profile.get("companyName"));
-				ticker.setIndustry((String)profile.get("industry"));
-				ticker.setSector((String)profile.get("sector"));
+			ticker.setCompanyName(this.findCompanyName(ibdStatList, tickerSymbol));
+			if (ticker.getCompanyName() != null) {
 				if (this.tickerExists(tickerSymbol)) {
-					ticker.setStatus("Ticker already exists; will not be created"); 
+					ticker.setStatus("Ticker already exists; will not be created");
 				}
 				else {
 					ticker.setStatus("OK");
+					profile = this.findCompanyProfile(tickerSymbol);
+					if (profile != null && profile.get("companyName") != null) {
+						LOGGER.info("retrieveTickerInfo - company profile: {}", profile.toString());
+						ticker.setCompanyName((String) profile.get("companyName"));
+						ticker.setIndustry((String)profile.get("industry"));
+						ticker.setSector((String)profile.get("sector"));
+					}
 				}
 			}
 			else {
-				LOGGER.info("retrieveTickerInfo - ticker " + tickerSymbol + " was not found in Yahoo Finance");
-				ticker.setCompanyName(this.findCompanyName(ibdStatList, tickerSymbol));
-				if (ticker.getCompanyName() != null) {
-					if (this.tickerExists(tickerSymbol)) {
-						ticker.setStatus("Ticker already exists; will not be created"); 
-					}
-					else {
-						ticker.setStatus("OK");
-					}
-				}
-				else {
-					ticker.setStatus("No company name available");
-				}
+				ticker.setStatus("No company name available");
 			}
 			tickerInfoList.add(ticker);
 			LOGGER.info("retrieveTickerInfo - " + ticker.getTickerSymbol() + ":" + ticker.getStatus());
