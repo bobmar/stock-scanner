@@ -47,7 +47,7 @@ public class YahooPriceDownloader {
 	
 	private String tickerSymbol = null;
 	
-	private Logger logger = LoggerFactory.getLogger(YahooPriceDownloader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(YahooPriceDownloader.class);
 	
 	public void setTickerSymbol(String tickerSymbol) {
 		this.tickerSymbol = tickerSymbol;
@@ -55,7 +55,7 @@ public class YahooPriceDownloader {
 
 	public void retrQuotePage() {
 		String quotePageUrl = YAHOO_QUOTE_PAGE.replaceAll("ticker_symbol", this.tickerSymbol);
-		logger.debug("Quote Page URL: " + quotePageUrl);
+		LOGGER.debug("Quote Page URL: " + quotePageUrl);
 		try {
 			URL url = new URL(quotePageUrl);
 			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
@@ -76,49 +76,6 @@ public class YahooPriceDownloader {
 			e.printStackTrace();
 		}
 	}
-	@Deprecated
-	public List<PriceBean> downloadPrices(String tickerSymbol, Integer histDays) {
-		Calendar toCal = Calendar.getInstance();
-		Calendar fromCal = Calendar.getInstance();
-		fromCal.add(Calendar.DAY_OF_MONTH, histDays * -1);
-		List<PriceBean> priceDataList = new ArrayList<PriceBean>();
-		String urlStr = formatUrl(tickerSymbol, fromCal, toCal);
-		PriceBean priceData = null;
-		logger.debug("downloadPrices - URL string: " + urlStr);
-		try {
-			URL url = new URL(urlStr);
-			logger.debug("downloadPrices - Query:" + url.getQuery());
-			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-			conn.addRequestProperty("Cookie", COOKIE);
-			logger.debug("downloadPrices - Response: " + conn.getResponseMessage());
-			InputStream is = conn.getInputStream();
-			InputStreamReader reader = new InputStreamReader(is);
-			BufferedReader in = new BufferedReader(reader);
-			String s = null;
-			logger.debug("downloadPrices - Processing CSV lines");
-			while ((s = in.readLine()) != null) {
-				logger.debug("downloadPrices - {}", s);
-				priceData = new PriceBean(s);
-				if (priceData.isDataLoaded()) {
-					priceDataList.add(priceData);
-				}
-				else {
-					if (!s.startsWith("Date,Open,High,Low,Close")) {
-						logger.warn("downloadPrices - [" + tickerSymbol + "] unable to parse: " + s);
-					}
-				}
-			}
-			in.close();
-			logger.debug("downloadPrices - closed input stream");
-		} 
-		catch (MalformedURLException e) {
-			logger.error("downloadPrices - MalformedURLException: " + e.getMessage());
-		} 
-		catch (IOException e) {
-			logger.error("downloadPrices - IOException: " + e.getMessage());
-		}
-		return priceDataList;
-	}
 
 	public List<PriceBean> retrievePriceData(String tickerSymbol, Integer histDays) {
 		Calendar toCal = Calendar.getInstance();
@@ -127,10 +84,10 @@ public class YahooPriceDownloader {
 		List<PriceBean> priceDataList = new ArrayList<PriceBean>();
 		String urlStr = formatUrl(tickerSymbol, fromCal, toCal);
 		PriceBean priceData = null;
-		logger.debug("URL string: " + urlStr);
+		LOGGER.debug("URL string: " + urlStr);
 		try {
 			URI uri = URI.create(urlStr);
-			logger.debug("Query:" + uri.getQuery());
+			LOGGER.debug("Query:" + uri.getQuery());
 			HttpRequest request = HttpRequest.newBuilder()
 			.uri(uri)
 			.setHeader("Cookie", COOKIE)
@@ -150,7 +107,7 @@ public class YahooPriceDownloader {
 				}
 				else {
 					if (!s.startsWith("Date,Open,High,Low,Close")) {
-						logger.warn("downloadPrices - [" + tickerSymbol + "] unable to parse: " + s);
+						LOGGER.warn("downloadPrices - [" + tickerSymbol + "] unable to parse: " + s);
 					}
 				}
 			}
