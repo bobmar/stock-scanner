@@ -34,10 +34,10 @@ public class AvgPriceFactory {
 			avgPrice.setDaysCnt(days);
 			for (StockPrice price: priceList) {
 				totalVolume += price.getVolume();
-				totalPrice += price.getClosePrice().doubleValue();
-				totalHighLowRange += price.getHighLowRange().doubleValue();
-				totalOpenCloseRange += price.getOpenCloseRange().doubleValue();
-				if (++priceCnt > days) {
+				totalPrice += price.getClosePrice();
+				totalHighLowRange += price.getHighLowRange();
+				totalOpenCloseRange += price.getOpenCloseRange();
+				if (++priceCnt >= days) {
 					break;
 				}
 			}

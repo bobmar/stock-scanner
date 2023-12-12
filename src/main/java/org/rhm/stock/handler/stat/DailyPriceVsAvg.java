@@ -57,7 +57,7 @@ public class DailyPriceVsAvg implements StatisticCalculator {
 		AveragePrice avgPrice = null;
 		if (avg != null) {
 			for (AveragePrice ap: avg.getAvgList()) {
-				if (ap.getDaysCnt().intValue() == days) {
+				if (ap.getDaysCnt() == days) {
 					avgPrice = ap;
 					break;
 				}
