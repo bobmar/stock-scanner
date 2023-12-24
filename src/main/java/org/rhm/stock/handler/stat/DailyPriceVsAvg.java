@@ -33,7 +33,7 @@ public class DailyPriceVsAvg implements StatisticCalculator {
 	private StatisticService statSvc = null;
 	
 	private List<StockAveragePrice> avgPriceList = null;
-	private Logger logger = LoggerFactory.getLogger(DailyPriceVsAvg.class);
+	private static final Logger logger = LoggerFactory.getLogger(DailyPriceVsAvg.class);
 	
 	private void init(String tickerSymbol) {
 		avgPriceList = avgSvc.findAvgPriceList(tickerSymbol);
@@ -75,35 +75,36 @@ public class DailyPriceVsAvg implements StatisticCalculator {
 		calcVolVsAvg(price, days, volType, avgPrice);
 	}
 	
-	private void calcPriceVsAvg(StockPrice price, int days, String statType, AveragePrice avgPrice) {
+	protected StockStatistic calcPriceVsAvg(StockPrice price, int days, String statType, AveragePrice avgPrice) {
+		StockStatistic stat = null;
 		if (avgPrice != null) {
 			logger.debug("calcPriceVsAvg - average price " + avgPrice.getDaysCnt() + ":" + avgPrice.getAvgPrice());
-			double priceVsAvg = (price.getClosePrice().doubleValue() / avgPrice.getAvgPrice().doubleValue());
+			double priceVsAvg = (price.getClosePrice() / avgPrice.getAvgPrice());
 			logger.debug("calcPriceVsAvg - " + price.getPriceId() + " price vs. " + days + " day average=" + priceVsAvg);
-			statSvc.createStatistic(
-				new StockStatistic(price.getPriceId(), statType, priceVsAvg, price.getTickerSymbol(), price.getPriceDate())
-				,false);
+			stat = new StockStatistic(price.getPriceId(), statType, priceVsAvg, price.getTickerSymbol(), price.getPriceDate());
+			statSvc.createStatistic(stat,false);
 		}
 		else {
 			logger.debug("calcPriceVsAvg - unable to find " + days + " average price for " + price.getPriceId());
 		}
+		return stat;
 	}
 	
-	private void calcVolVsAvg(StockPrice price, int days, String statType, AveragePrice avgPrice) {
+	protected StockStatistic calcVolVsAvg(StockPrice price, int days, String statType, AveragePrice avgPrice) {
+		StockStatistic stat = null;
 		if (avgPrice != null) {
 			logger.debug("calcVolVsAvg - average volume " + avgPrice.getDaysCnt() + ":" + avgPrice.getAvgVolume());
 			double volVsAvg = (price.getVolume().doubleValue() / avgPrice.getAvgVolume().doubleValue());
 			logger.debug("calcVolVsAvg - " + price.getPriceId() + " volume vs. " + days + " day average=" + volVsAvg);
-			statSvc.createStatistic(
-				new StockStatistic(price.getPriceId(), statType, volVsAvg, price.getTickerSymbol(), price.getPriceDate())
-				,false);
+			stat = new StockStatistic(price.getPriceId(), statType, volVsAvg, price.getTickerSymbol(), price.getPriceDate());
+			statSvc.createStatistic(stat,false);
 		}
 		else {
 			logger.debug("calcVolVsAvg - unable to find " + days + " average volume for " + price.getPriceId());
 		}
+		return stat;
 	}
-	
-	
+
 	private void calcAvg20Vs200(StockPrice price) {
 		StockAveragePrice avgPrice = this.findStockAvgPrice(price.getPriceId());
 		if (avgPrice != null) {
@@ -120,7 +121,7 @@ public class DailyPriceVsAvg implements StatisticCalculator {
 			}
 			double avg20Vs200 = 0.0;
 			if (avgPrice20 != null && avgPrice200 != null) {
-				avg20Vs200 = avgPrice20.getAvgPrice().doubleValue() / avgPrice200.getAvgPrice().doubleValue();
+				avg20Vs200 = avgPrice20.getAvgPrice() / avgPrice200.getAvgPrice();
 				statSvc.createStatistic(
 					new StockStatistic(price.getPriceId(), AVG_PRC_20_VS_200, avg20Vs200, price.getTickerSymbol(), price.getPriceDate())
 					,false);
@@ -137,7 +138,7 @@ public class DailyPriceVsAvg implements StatisticCalculator {
 		double daysAbove = 0, daysBelow = 0;
 		StockStatistic firstStat = statList.get(0);
 		for (StockStatistic stat: statList) {
-			if (stat.getStatisticValue().doubleValue() < 1) {
+			if (stat.getStatisticValue() < 1) {
 				daysBelow++;
 			}
 			else {
