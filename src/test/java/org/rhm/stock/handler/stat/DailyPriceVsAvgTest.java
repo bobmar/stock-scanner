@@ -23,6 +23,7 @@ import java.util.List;
 
 @SpringBootTest(classes = {DailyPriceVsAvg.class})
 public class DailyPriceVsAvgTest {
+  private static final String DLY_VOL_VS_20_DAY_AVG = "DYVOLV20A";
   private static final String DLY_PRC_VS_20_DAY_AVG = "DYPRCV20A";
   @Autowired
   private DailyPriceVsAvg dlyPriceVsAvg;
@@ -40,7 +41,7 @@ public class DailyPriceVsAvgTest {
   }
 
   @Test
-  public void calculatePriceVsAvgTest() {
+  public void calcPriceVsAvgTest() {
     StockPrice price = new StockPrice();
     price.setPriceId("ZZZ:2023-12-24");
     price.setTickerSymbol("ZZZ");
@@ -53,6 +54,20 @@ public class DailyPriceVsAvgTest {
     Assertions.assertNotNull(stat);
   }
 
+  @Test
+  public void calcVolVsAvgTest() {
+    StockPrice price = new StockPrice();
+    price.setPriceId("ZZZ:2023-12-24");
+    price.setTickerSymbol("ZZZ");
+    price.setClosePrice(100.0);
+    price.setVolume(10000L);
+    AveragePrice avgPrice = new AveragePrice();
+    avgPrice.setAvgPrice(100.0);
+    avgPrice.setAvgVolume(10000);
+    StockStatistic stat = dlyPriceVsAvg.calcVolVsAvg(price, 20, DLY_VOL_VS_20_DAY_AVG, avgPrice);
+    Assertions.assertEquals(1.0, stat.getStatisticValue());
+    Assertions.assertEquals(String.format("%s:%s", price.getPriceId(), DLY_VOL_VS_20_DAY_AVG), stat.getStatId());
+  }
   private List<StockAveragePrice> avgPriceList() {
     List<StockAveragePrice> averagePrices = new ArrayList<>();
     StockAveragePrice avgPrice = new StockAveragePrice();
