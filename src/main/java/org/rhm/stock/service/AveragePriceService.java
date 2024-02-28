@@ -56,7 +56,7 @@ public class AveragePriceService {
 	}
 	
 	public List<String> findAvgPriceTickers(Date priceDate) {
-		List<String> tickerSymbolList = avgPriceRepo.findUniqueTickerSymbols(priceDate);
-		return tickerSymbolList;
+		return avgPriceRepo.findUniqueTickerSymbols(priceDate);
+		//return tickerSymbolList;
 	}
 }
