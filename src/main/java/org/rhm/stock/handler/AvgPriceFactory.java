@@ -1,6 +1,5 @@
 package org.rhm.stock.handler;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AvgPriceFactory {
-	private static Logger logger = LoggerFactory.getLogger(AvgPriceFactory.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AvgPriceFactory.class);
 	
 	public static List<AveragePrice> calculateAvgPrices(List<StockPrice> priceList, int[] days) {
 		List<AveragePrice> avgPriceList = new ArrayList<AveragePrice>();
@@ -25,8 +24,9 @@ public class AvgPriceFactory {
 	}
 
 	public static AveragePrice calculateAvgPrice(List<StockPrice> priceList, int days) {
+		LOGGER.info("calculateAvgPrice days={}", days);
 		AveragePrice avgPrice = null;
-		int totalVolume = 0;
+		long totalVolume = 0;
 		double totalPrice = 0.0, totalHighLowRange = 0.0, totalOpenCloseRange = 0.0;
 		int priceCnt = 0;
 		if (priceList.size() > days) {
@@ -42,13 +42,12 @@ public class AvgPriceFactory {
 				}
 			}
 			avgPrice.setAvgPrice(totalPrice / days);
-			avgPrice.setAvgVolume(totalVolume / days);
+			avgPrice.setAvgVolume((int)(totalVolume / days));
 			avgPrice.setAvgHighLowRange(totalHighLowRange / days);
 			avgPrice.setAvgOpenCloseRange(totalOpenCloseRange / days);
-			logger.debug("calculateAvgPrice - " + days + " average price/volume=" + avgPrice.getAvgPrice() + "/" + avgPrice.getAvgVolume());
 		}
 		else {
-			logger.debug("calculateAvgPrice - insufficient price history to calculate " + days + " day average");
+			LOGGER.debug("calculateAvgPrice - insufficient price history to calculate " + days + " day average");
 		}
 		return avgPrice;
 	}
