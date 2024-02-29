@@ -1,0 +1,152 @@
+[{
+  "_id": "WKCLSPCT",
+  "statisticDesc": "Weekly Closing Price Change Pct",
+  "showInDashboard": true,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "DYPCTCHG",
+  "statisticDesc": "Daily Price Percentage Change",
+  "showInDashboard": true,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "DYPRCCHG",
+  "statisticDesc": "Daily Price Change",
+  "showInDashboard": false,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "UPDNVOL50",
+  "statisticDesc": "Up/Down Volume over past 50 Days",
+  "showInDashboard": true,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "DYPRCV50A",
+  "statisticDesc": "Daily Price vs. 50-day Average",
+  "showInDashboard": true,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "DYPRCV200A",
+  "statisticDesc": "Daily Price vs. 200-day Average",
+  "showInDashboard": true,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "HIPR4WK",
+  "statisticDesc": "4-week High Price",
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "LOPR2WK",
+  "statisticDesc": "2-week Low Price",
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "LOPR4WK",
+  "statisticDesc": "4-week Low Price",
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "HIPR2WK",
+  "statisticDesc": "2-week High Price",
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "STDDEV2WK",
+  "statisticDesc": "2-week Standard Deviation",
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "STDDEV10WK",
+  "statisticDesc": "10-week Standard Deviation",
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "PCTCHG4WK",
+  "statisticDesc": "Price Change - 4 week",
+  "showInDashboard": true,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "PCTCHG8WK",
+  "statisticDesc": "Price Change - 8 week",
+  "showInDashboard": true,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "PCTCHG12WK",
+  "statisticDesc": "Price Change - 12 week",
+  "showInDashboard": true,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "WKCLSPRC",
+  "statisticDesc": "Weekly Closing Price Change Amt",
+  "showInDashboard": false,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "NETABVBLW50",
+  "statisticDesc": "Net Days Above/Below 50 Day Avg",
+  "showInDashboard": true
+},
+{
+  "_id": "HIPR11WK",
+  "statisticDesc": "11-week High Price",
+  "showInDashboard": false
+},
+{
+  "_id": "LOPR11WK",
+  "statisticDesc": "11-week Low Price",
+  "showInDashboard": false
+},
+{
+  "_id": "AVG20V200",
+  "statisticDesc": "20/200 Period Average Price Ratio",
+  "showInDashboard": false,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "ZSCORE",
+  "statisticDesc": "Z-Score (for determining momentum)",
+  "showInDashboard": true,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "TRMOM",
+  "statisticDesc": "Total Return Momentum",
+  "showInDashboard": true,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "DYPRCV20A",
+  "statisticDesc": "Daily Price vs. 20-day Average"
+},
+{
+  "_id": "DYVOLV20A",
+  "statisticDesc": "Daily Volume vs. 20-day Average",
+  "showInDashboard": true
+},
+{
+  "_id": "DYVOLV50A",
+  "statisticDesc": "Daily Volume vs. 50-day Average",
+  "showInDashboard": true
+},
+{
+  "_id": "DYVOLV200A",
+  "statisticDesc": "Daily Volume vs. 200-day Average",
+  "showInDashboard": true
+},
+{
+  "_id": "DYPRCV10A",
+  "statisticDesc": "Daily Price vs. 10-day Average",
+  "showInDashboard": true
+},
+{
+  "_id": "DYVOLV10A",
+  "statisticDesc": "Daily Volume vs. 10-day Average",
+  "showInDashboard": true
+}]

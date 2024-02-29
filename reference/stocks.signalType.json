@@ -1,0 +1,232 @@
+[{
+  "_id": "4WKUP",
+  "signalDesc": "Closing price up 4 consecutive weeks",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "GAPUP",
+  "signalDesc": "Opening price gapped up",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "GAPDN",
+  "signalDesc": "Opening price gapped down",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "CLSHI",
+  "signalDesc": "Closing price near high",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "UPTREND",
+  "signalDesc": "Average closing price in uptrend",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "DNTREND",
+  "signalDesc": "Average closing price in downtrend",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "5WKUP",
+  "signalDesc": "Closing price up 5 consecutive weeks",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "4WKBRK",
+  "signalDesc": "High price exceeds 4-week high",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "VOLUPTREND",
+  "signalDesc": "Average volume in uptrend",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "UPDNVOLINCR",
+  "signalDesc": "Up/Down volume ratio increased",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "UPDNVOL3_4",
+  "signalDesc": "Up/Down volume >=3 and <4",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "UPDNVOL4_5",
+  "signalDesc": "Up/Down volume >=4 and <5",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "UPDNVOL5_6",
+  "signalDesc": "Up/Down volume >=5 and <6",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "SD2GT10",
+  "signalDesc": "Std Deviation 2-WK GT 10-WK",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "DYV50XUP",
+  "signalDesc": "Daily Price vs. 50 Crossover (Up)",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "DYV50XDN",
+  "signalDesc": "Daily Price vs. 50 Crossover (Down)",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "BEARFLIP",
+  "signalDesc": "Bearish TD Price Flip",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "BUYSETUP",
+  "signalDesc": "TD Buy Setup",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "PBUYSETUP",
+  "signalDesc": "Perfected TD Buy Setup",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "SEQUENTIAL",
+  "signalDesc": "TD Sequential",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "4WKDN",
+  "signalDesc": "Closing price down 4 consecutive weeks"
+},
+{
+  "_id": "5WKDN",
+  "signalDesc": "Closing price down 5 consecutive weeks"
+},
+{
+  "_id": "HHHL3",
+  "signalDesc": "Higher highs, higher lows for 3 days"
+},
+{
+  "_id": "LLLH3",
+  "signalDesc": "Lower lows, lower highs for 3 days"
+},
+{
+  "_id": "HHHL3U",
+  "signalDesc": "Up after higher highs, higher lows for 3 days"
+},
+{
+  "_id": "LLLH3D",
+  "signalDesc": "Down after lower lows, lower highs for 3 days"
+},
+{
+  "_id": "DYV200XUP",
+  "signalDesc": "Daily Price vs. 200 Crossover (Up)",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "DYV200XDN",
+  "signalDesc": "Daily Price vs. 200 Crossover (Down)",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "IBDCINC",
+  "signalDesc": "IBD Composite score increased"
+},
+{
+  "_id": "IBDRSINC",
+  "signalDesc": "IBD Relative Strength rating increased"
+},
+{
+  "_id": "IBDRSX90",
+  "signalDesc": "IBD Relative Strength crossed above 90"
+},
+{
+  "_id": "11WKBRK",
+  "signalDesc": "High price exceeds 11-week high"
+},
+{
+  "_id": "RRTRK",
+  "signalDesc": "Railroad Tracks (sell signal)",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "AVGVOL500K",
+  "signalDesc": "Average Volume (50 day) above 500K",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "MOMENTUM",
+  "signalDesc": "Momentum Candidate (Uptrend, Up/Down Volume, 500K Volume)",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "AVG20ABV200",
+  "signalDesc": "20-Day Average Price Above 200-Day Average",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "DLYV500507",
+  "signalDesc": "Close Price 5-7% above 50-Day Average Price",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "ZSPOS5DY",
+  "signalDesc": "Z-Score Positive for last 5 days",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "ZSNEG5DY",
+  "signalDesc": "Z-Score Negative for last 5 days",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "TRMPOS5DY",
+  "signalDesc": "Total Return Momentum Positive for last 5 days",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "TRMNEG5DY",
+  "signalDesc": "Total Return Momentum Negative for last 5 days",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "IBDADAB",
+  "signalDesc": "IBD Accum/Dist is A or B",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "INSIDE",
+  "signalDesc": "Inside Day",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "IBD3PLUS",
+  "signalDesc": "IBD List Membership > 3",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "ZSXOVER",
+  "signalDesc": "Z-Score Crossover",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "TRXOVER",
+  "signalDesc": "Total Return Momentum Crossover",
+  "_class": "org.rhm.stock.domain.SignalType"
+},
+{
+  "_id": "UPDNVOLGT1",
+  "signalDesc": "Up/Down volume > 1"
+},
+{
+  "_id": "DLYABV20A",
+  "signalDesc": "Daily Price above 20-day Average"
+},
+{
+  "_id": "IBDMGMT5",
+  "signalDesc": "IBD Management Ownership pct 5 or higher"
+}]

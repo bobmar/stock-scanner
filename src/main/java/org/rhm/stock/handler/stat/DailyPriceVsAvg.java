@@ -18,9 +18,11 @@ import org.springframework.stereotype.Component;
 @Qualifier("dailyPriceVsAvg")
 public class DailyPriceVsAvg implements StatisticCalculator {
 
+	private static final String DLY_PRC_VS_10_DAY_AVG = "DYPRCV10A";
 	private static final String DLY_PRC_VS_20_DAY_AVG = "DYPRCV20A";
 	private static final String DLY_PRC_VS_50_DAY_AVG = "DYPRCV50A";
 	private static final String DLY_PRC_VS_200_DAY_AVG = "DYPRCV200A";
+	private static final String DLY_VOL_VS_10_DAY_AVG = "DYVOLV10A";
 	private static final String DLY_VOL_VS_20_DAY_AVG = "DYVOLV20A";
 	private static final String DLY_VOL_VS_50_DAY_AVG = "DYVOLV50A";
 	private static final String DLY_VOL_VS_200_DAY_AVG = "DYVOLV200A";
@@ -168,6 +170,7 @@ public class DailyPriceVsAvg implements StatisticCalculator {
 		this.init(firstPrice.getTickerSymbol());
 		logger.info("calculate - processing " + priceList.size() + " prices for " + firstPrice.getTickerSymbol());
 		for (StockPrice price: priceList) {
+			this.calcCurrVsAvg(price, 10, DLY_PRC_VS_10_DAY_AVG, DLY_VOL_VS_10_DAY_AVG);
 			this.calcCurrVsAvg(price, 20, DLY_PRC_VS_20_DAY_AVG, DLY_VOL_VS_20_DAY_AVG);
 			this.calcCurrVsAvg(price, 50, DLY_PRC_VS_50_DAY_AVG, DLY_VOL_VS_50_DAY_AVG);
 			this.calcCurrVsAvg(price, 200, DLY_PRC_VS_200_DAY_AVG, DLY_VOL_VS_200_DAY_AVG);
