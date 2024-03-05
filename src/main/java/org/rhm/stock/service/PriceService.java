@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.dto.CompositePrice;
 import org.rhm.stock.dto.PriceBean;
+import org.rhm.stock.io.AlphaVantageDownload;
+import org.rhm.stock.io.PriceDownload;
 import org.rhm.stock.io.YahooPriceDownloader;
 import org.rhm.stock.repository.PriceRepo;
 import org.slf4j.Logger;
@@ -27,11 +29,15 @@ public class PriceService {
 	private CompositePriceService cpSvc = null;
 	@Autowired
 	private YahooPriceDownloader priceDownloader = null;
+	@Autowired
+	private PriceDownload priceDownload;
 	private Logger logger = LoggerFactory.getLogger(PriceService.class);
 	private DateFormat dtFmt = new SimpleDateFormat("yyyy-MM-dd");
 	
-	public List<StockPrice> retrieveSourcePrices(String tickerSymbol, int days) {
-		List<PriceBean> priceBeanList = priceDownloader.retrievePriceData(tickerSymbol, days);
+	public List<StockPrice> retrieveSourcePrices(String tickerSymbol, int days, int existingPrices) {
+		boolean downloadFull = (days - existingPrices)>100;
+		List<PriceBean> priceBeanList =
+				downloadFull?this.priceDownload.downloadPrices(tickerSymbol, AlphaVantageDownload.FORMAT_FULL):this.priceDownload.downloadPrices(tickerSymbol);
 		List<StockPrice> priceList = new ArrayList<StockPrice>();
 		logger.debug("retrieveSourcePrices - transforming price beans");
 		for (PriceBean bean: priceBeanList) {
@@ -45,6 +51,9 @@ public class PriceService {
 			price.setTickerSymbol(tickerSymbol);
 			price.setVolume(bean.getVolume());
 			priceList.add(price);
+			if (priceList.size() >= days) {
+				break;
+			}
 		}
 		logger.debug("retrieveSourcePrices - returning StockPrice entries");
 		return priceList;

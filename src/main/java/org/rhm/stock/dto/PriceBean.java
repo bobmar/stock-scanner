@@ -21,14 +21,10 @@ public class PriceBean {
 	private static final int HIGH_INDX = 2;
 	private static final int LOW_INDX = 3;
 	private static final int CLOSE_INDX = 4;
-	private static final int VOLUME_INDX_GOOGLE = 5;
-	private static final int VOLUME_INDX_YAHOO = 6;
+	private static final int VOLUME_INDX = 5;
 	private static final int ADJ_CLS_INDX = 5;
-	private static final int EXPECTED_FIELD_CNT_GOOGLE = 6;
-	private static final int EXPECTED_FIELD_CNT_YAHOO = 7;
 	private static final String DATE_TEXT = "Date";
-	private DateFormat dtFmtGoogle = new SimpleDateFormat("dd-MMM-yy"); //Google Finance format
-	private DateFormat dtFmtYahoo = new SimpleDateFormat("yyyy-MM-dd"); // Yahoo Finance format
+	private DateFormat dtFmt = new SimpleDateFormat("yyyy-MM-dd");
 	private boolean dataLoaded = false;
 	private Logger logger = LoggerFactory.getLogger(PriceBean.class);
 	public PriceBean(String priceCsv) {
@@ -38,38 +34,29 @@ public class PriceBean {
 	
 	private void parsePrice(String priceData) {
 		String[] price = priceData.split(",");
-		if (price.length == EXPECTED_FIELD_CNT_GOOGLE || price.length == EXPECTED_FIELD_CNT_YAHOO) {
-			if (!price[0].substring(1).equals(DATE_TEXT)) {
-				try {
-					openPrice = Double.valueOf(price[OPEN_INDX]);
-					highPrice = Double.valueOf(price[HIGH_INDX]);
-					lowPrice = Double.valueOf(price[LOW_INDX]);
-					closePrice = Double.valueOf(price[CLOSE_INDX]);
-					if (price.length == EXPECTED_FIELD_CNT_YAHOO) {
-						volume = Long.valueOf(price[VOLUME_INDX_YAHOO]);
-						adjClose = Double.valueOf(price[ADJ_CLS_INDX]);
-						date = dtFmtYahoo.parse(price[DATE_INDX]);
-					}
-					else {
-						volume = Long.valueOf(price[VOLUME_INDX_GOOGLE]);
-						date = dtFmtGoogle.parse(price[DATE_INDX]);
-					}
-					dataLoaded = true;
-				} 
-				catch (ParseException e) {
-					if (!priceData.startsWith("Date,Open,High,Low,Close")) {
-						logger.error(e.getMessage());
-					}
-				}
-				catch (NumberFormatException e) {
-					if (!priceData.startsWith("Date,Open,High,Low,Close")) {
-						logger.error(e.getMessage());
-					}
+		if (!price[0].substring(1).equals(DATE_TEXT)) {
+			try {
+				openPrice = Double.valueOf(price[OPEN_INDX]);
+				highPrice = Double.valueOf(price[HIGH_INDX]);
+				lowPrice = Double.valueOf(price[LOW_INDX]);
+				closePrice = Double.valueOf(price[CLOSE_INDX]);
+				volume = Long.valueOf(price[VOLUME_INDX]);
+				date = dtFmt.parse(price[DATE_INDX]);
+				dataLoaded = true;
+			}
+			catch (ParseException e) {
+				if (!priceData.startsWith("Date,Open,High,Low,Close")) {
+					logger.error(e.getMessage());
 				}
 			}
-			else {
-				logger.debug("parsePrice - skip header");
+			catch (NumberFormatException e) {
+				if (!priceData.startsWith("Date,Open,High,Low,Close")) {
+					logger.error(e.getMessage());
+				}
 			}
+		}
+		else {
+			logger.debug("parsePrice - skip header");
 		}
 	}
 	

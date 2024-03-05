@@ -47,10 +47,10 @@ public class PriceLoaderJob implements BatchJob {
 			days = 540;
 		}
 		logger.info("processTicker - retrieve prices for {}", tickerSymbol);
-		List<StockPrice> priceList = priceSvc.retrieveSourcePrices(tickerSymbol, days);
+		List<StockPrice> priceList = priceSvc.retrieveSourcePrices(tickerSymbol, days, (int)cnt);
 		logger.debug("processTicker - found {} prices for {}", priceList.size(), tickerSymbol);
 		Date mostRecentPriceDate = null;
-		if (priceList != null && priceList.size() > 0) {
+		if (!priceList.isEmpty()) {
 			if (priceSvc.saveStockPrice(priceList) != null) {
 				success = true;
 				mostRecentPriceDate = findMostRecentPriceDate(priceList);
