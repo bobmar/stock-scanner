@@ -72,11 +72,23 @@ public class PriceLoaderJob implements BatchJob {
 	private int processTickers(List<StockTicker> tickerList) {
 		int status = 100;
 		int tickerCnt = 0;
+		int numPerInterval = 30;
+		final long interval = 60000;
+		long checkPoint = System.currentTimeMillis();
+		long timeRemaining = -1;
 		for (StockTicker ticker: tickerList) {
 			if (this.processTicker(ticker.getTickerSymbol())) {
 				tickerCnt++;
-				if (tickerCnt > 10 && tickerCnt % 10 == 0) {
-					logger.info("processTickers - tickers processed: {}; max mem: {}, free mem: {}", tickerCnt, Runtime.getRuntime().maxMemory(), Runtime.getRuntime().freeMemory());
+				if (tickerCnt >= numPerInterval && tickerCnt % numPerInterval == 0) {
+					timeRemaining = System.currentTimeMillis() - checkPoint;
+					if (timeRemaining > 0) {
+            try {
+              Thread.sleep(timeRemaining);
+            } catch (InterruptedException e) {
+              throw new RuntimeException(e);
+            }
+          }
+					checkPoint = System.currentTimeMillis();
 					System.gc();
 				}
 			}
