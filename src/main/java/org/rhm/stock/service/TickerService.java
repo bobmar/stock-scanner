@@ -33,13 +33,13 @@ import org.springframework.stereotype.Service;
 public class TickerService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TickerService.class);
 	@Autowired
-	private TickerRepo tickerRepo = null;
+	private TickerRepo tickerRepo;
 	@Autowired
-	private ExcelTransformer excel = null;
+	private ExcelTransformer excel;
 	@Autowired
-	private IbdStatisticRepo ibdRepo = null;
+	private IbdStatisticRepo ibdRepo;
 	@Autowired
-	private PriceRepo priceRepo = null;
+	private PriceRepo priceRepo;
 	@Autowired
 	private CboeWeekly cboeWeekly;
 	@Autowired
@@ -47,7 +47,7 @@ public class TickerService {
 	public String createTicker(String tickerSymbol) {
 		StockTicker stockTicker = null;
 		String message = null;
-		Map<String,Object> companyInfo = this.companyInfoDownload.retrieveProfile(tickerSymbol);
+		Map<String,Object> companyInfo = this.companyInfoDownload.retrieveCompanyInfo(tickerSymbol);
 		if (companyInfo.get("companyName") == null) {
 			message = String.format("%s: %s", tickerSymbol, companyInfo.get("message"));
 		}
@@ -226,8 +226,7 @@ public class TickerService {
 	}
 	
 	public Map<String,Object> findCompanyProfile(String tickerSymbol) {
-		Map<String,Object> profile = this.companyInfoDownload.retrieveProfile(tickerSymbol);
-		return profile;
+		return this.companyInfoDownload.retrieveCompanyInfo(tickerSymbol);
 	}
 
 	public Page<StockTicker> findPage(Pageable pageable) {

@@ -11,13 +11,13 @@ import java.util.stream.Collectors;
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.dto.CompositePrice;
 import org.rhm.stock.dto.PriceBean;
-import org.rhm.stock.io.AlphaVantageDownload;
-import org.rhm.stock.io.PriceDownload;
+import org.rhm.stock.io.DataDownload;
 import org.rhm.stock.io.YahooPriceDownloader;
 import org.rhm.stock.repository.PriceRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
@@ -30,14 +30,14 @@ public class PriceService {
 	@Autowired
 	private YahooPriceDownloader priceDownloader = null;
 	@Autowired
-	private PriceDownload priceDownload;
+	@Qualifier("fmpDownload")
+	private DataDownload priceDownload;
 	private Logger logger = LoggerFactory.getLogger(PriceService.class);
 	private DateFormat dtFmt = new SimpleDateFormat("yyyy-MM-dd");
 	
-	public List<StockPrice> retrieveSourcePrices(String tickerSymbol, int days, int existingPrices) {
-		boolean downloadFull = (days - existingPrices)>100;
+	public List<StockPrice> retrieveSourcePrices(String tickerSymbol, int days) {
 		List<PriceBean> priceBeanList =
-				downloadFull?this.priceDownload.downloadPrices(tickerSymbol, AlphaVantageDownload.FORMAT_FULL):this.priceDownload.downloadPrices(tickerSymbol);
+				this.priceDownload.downloadPrices(tickerSymbol, days);
 		List<StockPrice> priceList = new ArrayList<StockPrice>();
 		logger.debug("retrieveSourcePrices - transforming price beans");
 		for (PriceBean bean: priceBeanList) {

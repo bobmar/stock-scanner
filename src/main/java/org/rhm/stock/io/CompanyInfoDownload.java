@@ -2,22 +2,31 @@ package org.rhm.stock.io;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.rhm.stock.dto.PriceBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Component
-public class CompanyInfoDownload {
-    @Value(value = "${company.download.apikey}")
+@Qualifier("fmpDownload")
+public class CompanyInfoDownload implements DataDownload {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompanyInfoDownload.class);
+    @Value(value = "${data.fmp.apikey}")
     private String apiKey;
     @Value(value = "${company.download.baseurl}")
     private String baseUrl;
@@ -43,7 +52,63 @@ public class CompanyInfoDownload {
         return url;
     }
 
-    public Map<String, Object> retrieveProfile(String tickerSymbol) {
+  private PriceBean createPriceBean(String priceDate, Map<String,Object> priceData) {
+    StringBuilder builder = new StringBuilder();
+    builder.append(priceDate);
+    builder.append(String.format(",%s", priceData.get("open")));
+    builder.append(String.format(",%s", priceData.get("high")));
+    builder.append(String.format(",%s", priceData.get("low")));
+    builder.append(String.format(",%s", priceData.get("close")));
+    builder.append(String.format(",%s", priceData.get("volume")));
+    return new PriceBean(builder.toString());
+  }
+
+  private List<PriceBean> transformPrices(String jsonString) {
+      List<PriceBean> prices = new ArrayList<>();
+      Map<String,Object> priceMap = null;
+      try {
+        priceMap = this.mapper.readValue(jsonString, Map.class);
+        List<Map<String,Object>> priceItems = (List<Map<String,Object>>)priceMap.get("historical");
+        for (Map<String,Object> price: priceItems) {
+          prices.add(this.createPriceBean((String)price.get("date"), price));
+        }
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+      return prices;
+    }
+
+    @Override
+    public List<PriceBean> downloadPrices(String tickerSymbol) {
+        return null;
+    }
+
+    @Override
+    public List<PriceBean> downloadPrices(String tickerSymbol, String format) {
+        return null;
+    }
+
+    @Override
+    public List<PriceBean> downloadPrices(String tickerSymbol, int days) {
+        LocalDate toDate = LocalDate.now();
+        LocalDate fromDate = toDate.minusDays(days);
+        String toDateParam = toDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String fromDateParam = fromDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        URI uri = URI.create(this.createPricesUrl(fromDateParam, toDateParam, tickerSymbol));
+        HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
+        HttpClient client = HttpClient.newHttpClient();
+        List<PriceBean> prices = null;
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            prices = this.transformPrices(response.body());
+        } catch (IOException | InterruptedException e) {
+            LOGGER.error(e.getMessage());
+        }
+        return prices;
+    }
+
+    @Override
+    public Map<String, Object> retrieveCompanyInfo(String tickerSymbol) {
         List<Map<String,Object>> result = null;
         Map<String,Object> returnObj = null;
         URI uri = URI.create(this.createProfileUrl(tickerSymbol));
