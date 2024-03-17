@@ -3,6 +3,7 @@ package org.rhm.stock.io;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.rhm.stock.domain.FinancialRatio;
+import org.rhm.stock.domain.KeyMetric;
 import org.rhm.stock.dto.PriceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,8 @@ public class CompanyInfoDownload implements DataDownload {
     private String profileUri;
     @Value(value = "${company.download.ratios}")
     private String ratiosUri;
+    @Value(value = "${company.download.key-metrics}")
+    private String keyMetricsUri;
     @Value(value = "${company.download.prices}")
     private String pricesUri;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -162,7 +165,7 @@ public class CompanyInfoDownload implements DataDownload {
     URI uri = URI.create(this.createRatioUrl(tickerSymbol));
     HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
     HttpClient client = HttpClient.newHttpClient();
-    List<Map<String,Object>> ratioList = null;
+    List<Map<String,Object>> ratioList;
     List<FinancialRatio> ratios = new ArrayList<>();
     try {
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -174,6 +177,32 @@ public class CompanyInfoDownload implements DataDownload {
       LOGGER.error(e.getMessage());
     }
     return ratios.stream()
+        .sorted((o1,o2)->{return (o1.getDate().compareTo(o2.getDate())*-1);})
+        .limit(5)
+        .toList();
+  }
+
+  @Override
+  public List<KeyMetric> retrieveKeyMetrics(String tickerSymbol) {
+    URI uri = URI.create(this.createUrl(this.baseUrl, this.keyMetricsUri, tickerSymbol));
+    HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
+    HttpClient client = HttpClient.newHttpClient();
+    List<Map<String,Object>> keyMetricList;
+    List<KeyMetric> keyMetrics = new ArrayList<>();
+    HttpResponse<String> response = null;
+    try {
+      response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 200) {
+        keyMetricList = mapper.readValue(response.body(), List.class);
+        keyMetricList.forEach(km->{
+          KeyMetric keyMetric = mapper.convertValue(km, KeyMetric.class);
+          keyMetrics.add(keyMetric);
+        });
+      }
+    } catch (IOException | InterruptedException e) {
+      LOGGER.error(e.getMessage());
+    }
+    return keyMetrics.stream()
         .sorted((o1,o2)->{return (o1.getDate().compareTo(o2.getDate())*-1);})
         .limit(5)
         .toList();
