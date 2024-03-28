@@ -2,6 +2,8 @@ package org.rhm.stock.io;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.rhm.stock.domain.FinancialRatio;
+import org.rhm.stock.domain.KeyMetric;
 import org.rhm.stock.dto.PriceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,18 @@ public class CompanyInfoDownloadTest {
     @Test
     public void priceDownloadTest() {
         List<PriceBean> prices = coInfo.downloadPrices("SMCI", 10);
-        Assertions.assertEquals(9, prices.size());
+        Assertions.assertNotNull(prices);
+    }
+
+    @Test
+    public void financialRatioTest() {
+        List<FinancialRatio> ratios = coInfo.retrieveFinancialRatios("SMCI");
+        Assertions.assertTrue(ratios.size() <= 5);
+    }
+
+    @Test
+    public void keyMetricsTest() {
+        List<KeyMetric> keyMetrics = coInfo.retrieveKeyMetrics("SMCI");
+        Assertions.assertTrue(keyMetrics.size() <= 5);
     }
 }

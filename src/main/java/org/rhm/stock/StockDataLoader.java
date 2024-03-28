@@ -43,7 +43,10 @@ public class StockDataLoader implements CommandLineRunner {
 	@Autowired
 	@Qualifier("aggregatorJob")
 	private BatchJob aggregatorJob = null;
-	
+	@Autowired
+	@Qualifier("financialRatioLoader")
+	private BatchJob finRatioJob;
+
 	private Logger logger = LoggerFactory.getLogger(StockDataLoader.class);
 	
 	public static void main(String...args) {
@@ -81,6 +84,10 @@ public class StockDataLoader implements CommandLineRunner {
 			case "AGGREGATOR":
 				jobList.add(aggregatorJob);
 				break;
+			case "FINRATIO":
+				jobList.add(finRatioJob);
+				break;
+
 			}
 		}
 		LocalDateTime startTime = LocalDateTime.now();

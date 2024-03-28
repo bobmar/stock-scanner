@@ -2,6 +2,8 @@ package org.rhm.stock.io;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.rhm.stock.domain.FinancialRatio;
+import org.rhm.stock.domain.KeyMetric;
 import org.rhm.stock.dto.PriceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -34,9 +37,11 @@ public class CompanyInfoDownload implements DataDownload {
     private String profileUri;
     @Value(value = "${company.download.ratios}")
     private String ratiosUri;
+    @Value(value = "${company.download.key-metrics}")
+    private String keyMetricsUri;
     @Value(value = "${company.download.prices}")
     private String pricesUri;
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
     private String createUrl(String baseUrl, String endpointUri, String tickerSymbol) {
         String fullUrl = baseUrl + endpointUri;
         return String.format(fullUrl, tickerSymbol, apiKey);
@@ -48,8 +53,11 @@ public class CompanyInfoDownload implements DataDownload {
     }
 
     public String createProfileUrl(String tickerSymbol) {
-        String url = this.createUrl(this.baseUrl, this.profileUri, tickerSymbol);
-        return url;
+        return this.createUrl(this.baseUrl, this.profileUri, tickerSymbol);
+    }
+
+    public String createRatioUrl(String tickerSymbol) {
+      return this.createUrl(this.baseUrl, this.ratiosUri, tickerSymbol);
     }
 
   private PriceBean createPriceBean(String priceDate, Map<String,Object> priceData) {
@@ -78,16 +86,6 @@ public class CompanyInfoDownload implements DataDownload {
         throw new RuntimeException(e);
       }
       return prices;
-    }
-
-    @Override
-    public List<PriceBean> downloadPrices(String tickerSymbol) {
-        return null;
-    }
-
-    @Override
-    public List<PriceBean> downloadPrices(String tickerSymbol, String format) {
-        return null;
     }
 
     @Override
@@ -149,4 +147,64 @@ public class CompanyInfoDownload implements DataDownload {
         }
         return returnObj;
     }
+
+  private List<FinancialRatio> transformRatios(List<Map<String,Object>> ratioResults) {
+      List<FinancialRatio> ratioList = new ArrayList<>();
+      FinancialRatio ratio = null;
+      for (Map<String,Object> item: ratioResults) {
+        ratio = mapper.convertValue(item, FinancialRatio.class);
+        ratio.setFinRatioId(String.format("%s:%s", ratio.getSymbol(), ratio.getDate()));
+        ratio.setCreateDate(LocalDateTime.now(ZoneId.of("UTC")));
+        ratioList.add(ratio);
+      }
+      return ratioList;
+  }
+
+  @Override
+  public List<FinancialRatio> retrieveFinancialRatios(String tickerSymbol) {
+    URI uri = URI.create(this.createRatioUrl(tickerSymbol));
+    HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
+    HttpClient client = HttpClient.newHttpClient();
+    List<Map<String,Object>> ratioList;
+    List<FinancialRatio> ratios = new ArrayList<>();
+    try {
+      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 200) {
+        ratioList = mapper.readValue(response.body(), List.class);
+        ratios = this.transformRatios(ratioList);
+      }
+    } catch (IOException | InterruptedException e) {
+      LOGGER.error(e.getMessage());
+    }
+    return ratios.stream()
+        .sorted((o1,o2)->{return (o1.getDate().compareTo(o2.getDate())*-1);})
+        .limit(5)
+        .toList();
+  }
+
+  @Override
+  public List<KeyMetric> retrieveKeyMetrics(String tickerSymbol) {
+    URI uri = URI.create(this.createUrl(this.baseUrl, this.keyMetricsUri, tickerSymbol));
+    HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
+    HttpClient client = HttpClient.newHttpClient();
+    List<Map<String,Object>> keyMetricList;
+    List<KeyMetric> keyMetrics = new ArrayList<>();
+    HttpResponse<String> response = null;
+    try {
+      response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 200) {
+        keyMetricList = mapper.readValue(response.body(), List.class);
+        keyMetricList.forEach(km->{
+          KeyMetric keyMetric = mapper.convertValue(km, KeyMetric.class);
+          keyMetrics.add(keyMetric);
+        });
+      }
+    } catch (IOException | InterruptedException e) {
+      LOGGER.error(e.getMessage());
+    }
+    return keyMetrics.stream()
+        .sorted((o1,o2)->{return (o1.getDate().compareTo(o2.getDate())*-1);})
+        .limit(5)
+        .toList();
+  }
 }
