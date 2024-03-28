@@ -69,8 +69,10 @@ public class CompanyInfoDownload implements DataDownload {
       try {
         priceMap = this.mapper.readValue(jsonString, Map.class);
         List<Map<String,Object>> priceItems = (List<Map<String,Object>>)priceMap.get("historical");
-        for (Map<String,Object> price: priceItems) {
-          prices.add(this.createPriceBean((String)price.get("date"), price));
+        if (priceItems != null) {
+          for (Map<String,Object> price: priceItems) {
+            prices.add(this.createPriceBean((String)price.get("date"), price));
+          }
         }
       } catch (JsonProcessingException e) {
         throw new RuntimeException(e);
