@@ -2,6 +2,7 @@ package org.rhm.stock.io;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.rhm.stock.domain.FinancialGrowth;
 import org.rhm.stock.domain.FinancialRatio;
 import org.rhm.stock.domain.KeyMetric;
 import org.rhm.stock.dto.PriceBean;
@@ -35,9 +36,14 @@ public class CompanyInfoDownloadTest {
     @Test
     public void financialRatioTest() {
         List<FinancialRatio> ratios = coInfo.retrieveFinancialRatios("SMCI");
-        Assertions.assertTrue(ratios.size() <= 5);
+        Assertions.assertTrue((ratios.size() <= 5 && !ratios.isEmpty()));
     }
 
+    @Test
+    public void financialGrowthTest() {
+        List<FinancialGrowth> finGrowthList = coInfo.retrieveFinancialGrowth("SMCI");
+        Assertions.assertTrue((finGrowthList.size() <= 5 && !finGrowthList.isEmpty()));
+    }
     @Test
     public void keyMetricsTest() {
         List<KeyMetric> keyMetrics = coInfo.retrieveKeyMetrics("SMCI");

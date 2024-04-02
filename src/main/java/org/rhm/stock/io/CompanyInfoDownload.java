@@ -2,6 +2,7 @@ package org.rhm.stock.io;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.rhm.stock.domain.FinancialGrowth;
 import org.rhm.stock.domain.FinancialRatio;
 import org.rhm.stock.domain.KeyMetric;
 import org.rhm.stock.dto.PriceBean;
@@ -41,6 +42,8 @@ public class CompanyInfoDownload implements DataDownload {
     private String keyMetricsUri;
     @Value(value = "${company.download.prices}")
     private String pricesUri;
+    @Value(value = "${company.download.fin-growth}")
+    private String finGrowthUri;
     private final ObjectMapper mapper = new ObjectMapper();
     private String createUrl(String baseUrl, String endpointUri, String tickerSymbol) {
         String fullUrl = baseUrl + endpointUri;
@@ -204,6 +207,40 @@ public class CompanyInfoDownload implements DataDownload {
     }
     return keyMetrics.stream()
         .sorted((o1,o2)->{return (o1.getDate().compareTo(o2.getDate())*-1);})
+        .limit(5)
+        .toList();
+  }
+
+  private List<FinancialGrowth> transformFinGrowth(List<Map<String,Object>> result) {
+      List<FinancialGrowth> finGrowthList = new ArrayList<>();
+      result.forEach(item ->{
+        FinancialGrowth finGrowth = mapper.convertValue(item, FinancialGrowth.class);
+        finGrowth.setCreateDate(LocalDateTime.now(ZoneId.of("GMT")));
+        finGrowth.setFinGrowthId(String.format("%s:%s", finGrowth.getSymbol(), finGrowth.getDate()));
+        finGrowthList.add(finGrowth);
+      });
+      return finGrowthList;
+  }
+  @Override
+  public List<FinancialGrowth> retrieveFinancialGrowth(String tickerSymbol) {
+    URI uri = URI.create(this.createUrl(this.baseUrl, this.finGrowthUri, tickerSymbol));
+    HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
+    HttpClient client = HttpClient.newHttpClient();
+    List<Map<String,Object>> finGrowthResult;
+    List<FinancialGrowth> financialGrowthList = new ArrayList<>();
+    HttpResponse<String> response = null;
+    try {
+      response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 200) {
+        finGrowthResult = mapper.readValue(response.body(), List.class);
+        financialGrowthList = this.transformFinGrowth(finGrowthResult);
+      }
+    } catch (IOException | InterruptedException e) {
+      LOGGER.error(e.getMessage());
+    }
+
+    return financialGrowthList.stream().sorted((o1,o2)->{return o1.getDate()
+        .compareTo(o2.getDate())*-1;})
         .limit(5)
         .toList();
   }
