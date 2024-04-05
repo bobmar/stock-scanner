@@ -258,12 +258,14 @@ public class TickerService {
 		int weeklyOptionCnt = 0;
 		List<StockTicker> tickers = this.retrieveTickerList();
 		for (StockTicker ticker: tickers) {
-			if (weeklyTickers.contains(ticker.getTickerSymbol())) {
-				ticker.setWeeklyOptions(true);
-				weeklyOptionCnt++;
-			}
-			else {
-				ticker.setWeeklyOptions(false);
+			if (!ticker.getWeeklyOptions()) {
+				if (weeklyTickers.contains(ticker.getTickerSymbol())) {
+					ticker.setWeeklyOptions(true);
+					weeklyOptionCnt++;
+				}
+				else {
+					ticker.setWeeklyOptions(false);
+				}
 			}
 		}
 		tickerRepo.saveAll(tickers);
