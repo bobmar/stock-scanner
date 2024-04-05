@@ -1,6 +1,6 @@
 package org.rhm.stock.batch;
 
-import org.rhm.stock.domain.FinancialRatio;
+import org.rhm.stock.domain.FinancialGrowth;
 import org.rhm.stock.domain.StockTicker;
 import org.rhm.stock.service.BatchStatusService;
 import org.rhm.stock.service.FinancialRatioService;
@@ -15,22 +15,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
-@Qualifier("financialRatioLoader")
-public class FinancialRatioLoader implements BatchJob {
-  private final static Logger LOGGER = LoggerFactory.getLogger(FinancialRatioLoader.class);
+@Qualifier("financialGrowthLoader")
+public class FinancialGrowthLoader implements BatchJob {
+  private final static Logger LOGGER = LoggerFactory.getLogger(FinancialGrowthLoader.class);
   @Autowired
-  private FinancialRatioService ratioService;
+  private FinancialRatioService finModelService;
   @Autowired
   private TickerService tickerService;
   @Autowired
   private BatchStatusService batchStatSvc;
   private int processTicker(String tickerSymbol) {
-    List<FinancialRatio> ratios = this.ratioService.downloadRatios(tickerSymbol);
-    if (!ratios.isEmpty()) {
-      LOGGER.info("processTicker - saving ratios for {}", tickerSymbol);
-      ratioService.saveRatios(ratios);
+    List<FinancialGrowth> financialGrowthList = this.finModelService.downloadFinancialGrowth(tickerSymbol);
+    if (!financialGrowthList.isEmpty()) {
+      LOGGER.info("processTicker - saving financial growth for {}", tickerSymbol);
+      finModelService.saveGrowthList(financialGrowthList);
     }
-    return ratios.size();
+    return financialGrowthList.size();
   }
 
   private int processTickers() {
@@ -44,9 +44,9 @@ public class FinancialRatioLoader implements BatchJob {
 
   @Override
   public BatchStatus run() {
-    BatchStatus status = new BatchStatus(FinancialRatioLoader.class);
-    int ratiosSaved = this.processTickers();
-    status.setCompletionMsg(String.format("Saved %s financial ratios", ratiosSaved));
+    BatchStatus status = new BatchStatus(FinancialGrowthLoader.class);
+    int recordsSaved = this.processTickers();
+    status.setCompletionMsg(String.format("Saved %s financial growth entries", recordsSaved));
     status.setFinishDate(LocalDateTime.now());
     status.setSuccess(Boolean.TRUE);
     batchStatSvc.saveBatchStatus(status);

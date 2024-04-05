@@ -31,7 +31,7 @@ public class FinancialRatioLoaderTest {
   @Test
   public void loaderTest() {
     when(financialRatioService.downloadRatios(anyString())).thenReturn(this.createFinancialRatioList());
-    doNothing().when(financialRatioService).save(anyList());
+    doNothing().when(financialRatioService).saveRatios(anyList());
     when(tickerService.retrieveTickerList()).thenReturn(this.createTickerList());
     BatchStatus status = ratioLoader.run();
     Assertions.assertTrue(status.getSuccess());
