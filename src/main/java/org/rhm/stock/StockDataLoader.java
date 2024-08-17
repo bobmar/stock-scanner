@@ -4,8 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.rhm.stock.batch.BatchJob;
-import org.rhm.stock.batch.BatchStatus;
+import org.rhm.stock.batch.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,43 +14,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.ApplicationContext;
 
 @SpringBootApplication
 @EnableCaching
 public class StockDataLoader implements CommandLineRunner {
 	@Autowired
-	@Qualifier("avgPriceCalc")
-	private BatchJob avgPriceCalc = null;
-	@Autowired
-	@Qualifier("priceLoader")
-	private BatchJob priceLoader = null;
-	@Autowired
-	@Qualifier("signalScan")
-	private BatchJob signalScan = null;
-	@Autowired
-	@Qualifier("statsCalcJob")
-	private BatchJob statCalc = null;
-	@Autowired
-	@Qualifier("pruner")
-	private BatchJob pruner = null;
-	@Autowired
-	@Qualifier("signalCount")
-	private BatchJob signalCount = null;
-	@Autowired
-	@Qualifier("keyStatLoader")
-	private BatchJob keyStatLoader = null;
-	@Autowired
-	@Qualifier("aggregatorJob")
-	private BatchJob aggregatorJob = null;
-	@Autowired
-	@Qualifier("financialRatioLoader")
-	private BatchJob finRatioJob;
-	@Autowired
-	@Qualifier("financialGrowthLoader")
-	private BatchJob finGrowthJob;
+	private ApplicationContext ctx;
 
 	private Logger logger = LoggerFactory.getLogger(StockDataLoader.class);
-	
 	public static void main(String...args) {
 		SpringApplication app = new SpringApplication(StockDataLoader.class);
 		app.setWebApplicationType(WebApplicationType.NONE);
@@ -64,34 +35,34 @@ public class StockDataLoader implements CommandLineRunner {
 		for (String arg: args) {
 			switch (arg) {
 			case "AVGPRICE":
-				jobList.add(avgPriceCalc);
+				jobList.add(ctx.getBean(AveragePriceCalculator.class));
 				break;
 			case "PRICELOAD":
-				jobList.add(priceLoader);
+				jobList.add(ctx.getBean(PriceLoaderJob.class));
 				break;
 			case "SIGSCAN":
-				jobList.add(signalScan);
+				jobList.add(ctx.getBean(SignalScanJob.class));
 				break;
 			case "STATSCALC":
-				jobList.add(statCalc);
+				jobList.add(ctx.getBean(StatisticsCalcJob.class));
 				break;
 			case "PRUNER":
-				jobList.add(pruner);
+				jobList.add(ctx.getBean(PrunerJob.class));
 				break;
 			case "SIGNALCNT":
-				jobList.add(signalCount);
+				jobList.add(ctx.getBean(SignalCountJob.class));
 				break;
 			case "KEYSTAT":
-				jobList.add(keyStatLoader);
+				jobList.add(ctx.getBean(KeyStatLoader.class));
 				break;
 			case "AGGREGATOR":
-				jobList.add(aggregatorJob);
+				jobList.add(ctx.getBean(AggregatorJob.class));
 				break;
 			case "FINRATIO":
-				jobList.add(finRatioJob);
+				jobList.add(ctx.getBean(FinancialRatioLoader.class));
 				break;
 			case "FINGROWTH":
-				jobList.add(finGrowthJob);
+				jobList.add(ctx.getBean(FinancialGrowthLoader.class));
 				break;
 			}
 		}
