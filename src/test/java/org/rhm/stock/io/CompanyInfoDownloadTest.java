@@ -49,4 +49,10 @@ public class CompanyInfoDownloadTest {
         List<KeyMetric> keyMetrics = coInfo.retrieveKeyMetrics("SMCI");
         Assertions.assertTrue(keyMetrics.size() <= 5);
     }
+
+    @Test
+    public void emaTest() {
+        String emaUrl = coInfo.createEmaUrl("VRT", "10");
+        LOGGER.info("emaUrl={}", emaUrl);
+    }
 }

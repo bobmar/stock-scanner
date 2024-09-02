@@ -1,11 +1,10 @@
 package org.rhm.stock.domain;
 
-import java.math.BigDecimal;
-
 public class AveragePrice {
 	private Integer daysCnt = null;
 	private Integer avgVolume = null;
 	private Double avgPrice = null;
+	private Double emaPrice = null;
 	private Double avgHighLowRange = null;
 	private Double avgOpenCloseRange = null;
 	public Integer getDaysCnt() {
@@ -38,4 +37,11 @@ public class AveragePrice {
 	public void setAvgOpenCloseRange(Double avgOpenCloseRange) {
 		this.avgOpenCloseRange = avgOpenCloseRange;
 	}
+	public Double getEmaPrice() {
+		return emaPrice;
+	}
+	public void setEmaPrice(Double emaPrice) {
+		this.emaPrice = emaPrice;
+	}
+
 }

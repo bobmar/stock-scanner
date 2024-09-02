@@ -8,13 +8,10 @@ import org.rhm.stock.domain.KeyMetric;
 import org.rhm.stock.dto.PriceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -24,7 +21,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Qualifier("fmpDownload")
@@ -44,6 +44,8 @@ public class CompanyInfoDownload implements DataDownload {
     private String pricesUri;
     @Value(value = "${company.download.fin-growth}")
     private String finGrowthUri;
+    @Value(value = "${company.download.techind}" )
+    private String techIndUri;
     private final ObjectMapper mapper = new ObjectMapper();
     private String createUrl(String baseUrl, String endpointUri, String tickerSymbol) {
         String fullUrl = baseUrl + endpointUri;
@@ -63,6 +65,14 @@ public class CompanyInfoDownload implements DataDownload {
       return this.createUrl(this.baseUrl, this.ratiosUri, tickerSymbol);
     }
 
+    public String createEmaUrl(String tickerSymbol, String period) {
+      return this.createTechIndUrl(tickerSymbol, "1day", "ema", period);
+    }
+
+    public String createTechIndUrl(String tickerSymbol, String timeFrame, String type, String period) {
+      String techIndUri = String.format(this.techIndUri, timeFrame, tickerSymbol, type, period, this.apiKey);
+      return String.format("%s%s", this.baseUrl, techIndUri);
+    }
   private PriceBean createPriceBean(String priceDate, Map<String,Object> priceData) {
     StringBuilder builder = new StringBuilder();
     builder.append(priceDate);
