@@ -64,6 +64,9 @@ public class StockDataLoader implements CommandLineRunner {
 			case "FINGROWTH":
 				jobList.add(ctx.getBean(FinancialGrowthLoader.class));
 				break;
+			case "EMAPRICE":
+				jobList.add(ctx.getBean(EmaPriceLoader.class));
+				break;
 			}
 		}
 		LocalDateTime startTime = LocalDateTime.now();

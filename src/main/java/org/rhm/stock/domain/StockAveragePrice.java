@@ -24,19 +24,7 @@ public class StockAveragePrice {
 		this.avgList = avgList;
 	}
 	
-	public AveragePrice getAvgPrice10Day() {
-		return this.findAvgPrice(10);
-	}
-	
-	public AveragePrice getAvgPrice50Day() {
-		return this.findAvgPrice(50);
-	}
-	
-	public AveragePrice getAvgPrice200Day() {
-		return this.findAvgPrice(200);
-	}
-	
-	private AveragePrice findAvgPrice(Integer days) {
+	public AveragePrice findAvgPrice(Integer days) {
 		AveragePrice avgPrice = null;
 		if (avgList != null) {
 			for (AveragePrice avg: avgList) {

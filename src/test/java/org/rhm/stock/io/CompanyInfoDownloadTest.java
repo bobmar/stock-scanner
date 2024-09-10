@@ -52,7 +52,7 @@ public class CompanyInfoDownloadTest {
 
     @Test
     public void emaTest() {
-        String emaUrl = coInfo.createEmaUrl("VRT", "10");
-        LOGGER.info("emaUrl={}", emaUrl);
+        List<Map<String,Object>> emaResult = coInfo.retrieveEma("VRT", "10");
+        Assertions.assertNotNull(emaResult);
     }
 }

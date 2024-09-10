@@ -254,4 +254,22 @@ public class CompanyInfoDownload implements DataDownload {
         .limit(5)
         .toList();
   }
+
+  public List<Map<String,Object>> retrieveEma(String tickerSymbol, String period) {
+      URI uri = URI.create(this.createEmaUrl(tickerSymbol, period));
+      HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
+      HttpClient client = HttpClient.newHttpClient();
+      List<Map<String,Object>> emaResult = null;
+      HttpResponse<String> response = null;
+    try {
+      response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 200) {
+        emaResult = mapper.readValue(response.body(), List.class);
+      }
+    } catch (IOException | InterruptedException e) {
+      LOGGER.error(e.getMessage());
+    }
+    return emaResult;
+  }
+
 }

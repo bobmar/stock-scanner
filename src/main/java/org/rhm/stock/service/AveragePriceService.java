@@ -1,20 +1,26 @@
 package org.rhm.stock.service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import org.rhm.stock.domain.AveragePrice;
 import org.rhm.stock.domain.StockAveragePrice;
+import org.rhm.stock.io.CompanyInfoDownload;
 import org.rhm.stock.repository.AveragePriceRepo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AveragePriceService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AveragePriceService.class);
 	@Autowired
 	private AveragePriceRepo avgPriceRepo = null;
-	
+	@Autowired
+	private CompanyInfoDownload coInfo;
 	public StockAveragePrice createAveragePrice(StockAveragePrice avgPrice) {
 		return avgPriceRepo.save(avgPrice);
 	}
@@ -45,9 +51,11 @@ public class AveragePriceService {
 				.collect(Collectors.toList());
 		return avgPriceList;
 	}
-	
+
+	public void saveAll(List<StockAveragePrice> averagePrices) {
+		avgPriceRepo.saveAll(averagePrices);
+	}
 	public long deleteOlderThan(Date deleteBefore) {
-//		return avgPriceRepo.deleteOlderThan(deleteBefore);
 		return avgPriceRepo.deleteByPriceDateBefore(deleteBefore);
 	}
 	
@@ -57,6 +65,49 @@ public class AveragePriceService {
 	
 	public List<String> findAvgPriceTickers(Date priceDate) {
 		return avgPriceRepo.findUniqueTickerSymbols(priceDate);
-		//return tickerSymbolList;
+	}
+
+	public Map<String,Object> retrieveEma(String tickerSymbol, String period, String earliestDate) {
+		Map<String,Object> emaPriceMap = new HashMap<>();
+		List<Map<String,Object>> emaList = this.coInfo.retrieveEma(tickerSymbol, period);
+		if (null != emaList) {
+			for (Map<String,Object> emaEntry: emaList) {
+				String emaDate = ((String)emaEntry.get("date")).substring(0,10);
+				if (emaDate.compareTo(earliestDate) >= 0) {
+					emaPriceMap.put(emaDate, emaEntry);
+				}
+			}
+		}
+		else {
+			LOGGER.warn("retrieveEma - emaList for {} of period {} is null", tickerSymbol, period);
+		}
+		return emaPriceMap;
+	}
+
+	public List<StockAveragePrice> addEmaToAvgBal(String tickerSymbol) {
+		DateFormat dtFmt = new SimpleDateFormat("yyyy-MM-dd");
+		List<StockAveragePrice> averagePrices = this.findAvgPriceList(tickerSymbol);
+		String earliestDate = dtFmt.format(averagePrices.get(averagePrices.size()-1).getPriceDate());
+		int[] period = {10, 20, 50, 200};
+		for (int p: period) {
+			Map<String,Object> emaMap = this.retrieveEma(tickerSymbol, String.valueOf(p), earliestDate);
+			if (null != emaMap) {
+				LOGGER.info("addEmaToAvgBal - found {} {}-day EMA entries for {}", emaMap.size(), p, tickerSymbol);
+				for (StockAveragePrice avgPrice: averagePrices) {
+					AveragePrice periodAvg = avgPrice.findAvgPrice(p);
+					String priceDate = dtFmt.format(avgPrice.getPriceDate());
+					if (null != periodAvg) {
+						Map<String,Object> emaItem = (Map<String,Object>)emaMap.get(priceDate);
+						if (null != emaItem) {
+							periodAvg.setEmaPrice((Double)emaItem.get("ema"));
+						}
+						else {
+							LOGGER.warn("addEmaToAvgBal - unable to find {} {}-day EMA on {}", tickerSymbol, p, priceDate);
+						}
+					}
+				}
+			}
+		}
+		return averagePrices;
 	}
 }
