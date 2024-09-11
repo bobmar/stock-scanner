@@ -81,8 +81,8 @@ public class TickerService {
 	public int saveTickerList(List<TickerInfo> tickerList) {
 		int tickersSavedCnt = 0;
 		String status = null;
-		for (TickerInfo info: tickerList) {
-			status = this.createTicker(info);
+		for (TickerInfo ticker: tickerList) {
+			status = this.createTicker(ticker.getTickerSymbol());
 			LOGGER.info("saveTickerList - {}", status);
 			if (status.contains("successfully created")) {
 				tickersSavedCnt++;
