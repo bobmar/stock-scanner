@@ -149,4 +149,28 @@
   "_id": "DYVOLV10A",
   "statisticDesc": "Daily Volume vs. 10-day Average",
   "showInDashboard": true
+},
+{
+  "_id": "DYPRCV10E",
+  "statisticDesc": "Daily Price vs. 10-day Exponential Moving Average",
+  "showInDashboard": false,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "DYPRCV20E",
+  "statisticDesc": "Daily Price vs. 20-day Exponential Moving Average",
+  "showInDashboard": false,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "DYPRCV50E",
+  "statisticDesc": "Daily Price vs. 50-day Exponential Moving Average",
+  "showInDashboard": false,
+  "_class": "org.rhm.stock.domain.StatisticType"
+},
+{
+  "_id": "DYPRCV200E",
+  "statisticDesc": "Daily Price vs. 200-day Exponential Moving Average",
+  "showInDashboard": false,
+  "_class": "org.rhm.stock.domain.StatisticType"
 }]
