@@ -87,22 +87,24 @@ public class AveragePriceService {
 	public List<StockAveragePrice> addEmaToAvgBal(String tickerSymbol) {
 		DateFormat dtFmt = new SimpleDateFormat("yyyy-MM-dd");
 		List<StockAveragePrice> averagePrices = this.findAvgPriceList(tickerSymbol);
-		String earliestDate = dtFmt.format(averagePrices.get(averagePrices.size()-1).getPriceDate());
-		int[] period = {10, 20, 50, 200};
-		for (int p: period) {
-			Map<String,Object> emaMap = this.retrieveEma(tickerSymbol, String.valueOf(p), earliestDate);
-			if (null != emaMap) {
-				LOGGER.info("addEmaToAvgBal - found {} {}-day EMA entries for {}", emaMap.size(), p, tickerSymbol);
-				for (StockAveragePrice avgPrice: averagePrices) {
-					AveragePrice periodAvg = avgPrice.findAvgPrice(p);
-					String priceDate = dtFmt.format(avgPrice.getPriceDate());
-					if (null != periodAvg) {
-						Map<String,Object> emaItem = (Map<String,Object>)emaMap.get(priceDate);
-						if (null != emaItem) {
-							periodAvg.setEmaPrice((Double)emaItem.get("ema"));
-						}
-						else {
-							LOGGER.warn("addEmaToAvgBal - unable to find {} {}-day EMA on {}", tickerSymbol, p, priceDate);
+		if (!averagePrices.isEmpty()) {
+			String earliestDate = dtFmt.format(averagePrices.get(averagePrices.size()-1).getPriceDate());
+			int[] period = {10, 20, 50, 200};
+			for (int p: period) {
+				Map<String,Object> emaMap = this.retrieveEma(tickerSymbol, String.valueOf(p), earliestDate);
+				if (null != emaMap) {
+					LOGGER.info("addEmaToAvgBal - found {} {}-day EMA entries for {}", emaMap.size(), p, tickerSymbol);
+					for (StockAveragePrice avgPrice: averagePrices) {
+						AveragePrice periodAvg = avgPrice.findAvgPrice(p);
+						String priceDate = dtFmt.format(avgPrice.getPriceDate());
+						if (null != periodAvg) {
+							Map<String,Object> emaItem = (Map<String,Object>)emaMap.get(priceDate);
+							if (null != emaItem) {
+								periodAvg.setEmaPrice((Double)emaItem.get("ema"));
+							}
+							else {
+								LOGGER.warn("addEmaToAvgBal - unable to find {} {}-day EMA on {}", tickerSymbol, p, priceDate);
+							}
 						}
 					}
 				}
