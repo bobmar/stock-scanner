@@ -2,6 +2,9 @@ package org.rhm.stock.domain;
 
 import org.springframework.data.annotation.Id;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 public class StockTicker {
 	@Id
 	private String tickerSymbol = null;
@@ -10,6 +13,7 @@ public class StockTicker {
 	private String sectorName = null;
 	private String industryName = null;
 	private Boolean weeklyOptions = false;
+	private LocalDateTime createDate = LocalDateTime.now(ZoneId.of("GMT"));
 	
 	public String getTickerSymbol() {
 		return tickerSymbol;
@@ -48,5 +52,13 @@ public class StockTicker {
 
 	public void setWeeklyOptions(Boolean weeklyOptions) {
 		this.weeklyOptions = weeklyOptions;
+	}
+
+	public LocalDateTime getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(LocalDateTime createDate) {
+		this.createDate = createDate;
 	}
 }
