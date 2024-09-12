@@ -29,8 +29,10 @@ public class EmaPriceLoader implements BatchJob {
   private int processTicker(String tickerSymbol) {
     LOGGER.info("processTicker - {}", tickerSymbol);
     List<StockAveragePrice> updatedList = this.avgPriceSvc.addEmaToAvgBal(tickerSymbol);
-    this.avgPriceSvc.saveAll(updatedList);
-    LOGGER.info("processTicker - found {} prices", updatedList.size());
+    if (!updatedList.isEmpty()) {
+      this.avgPriceSvc.saveAll(updatedList);
+      LOGGER.info("processTicker - found {} prices", updatedList.size());
+    }
     return updatedList.size();
   }
 
