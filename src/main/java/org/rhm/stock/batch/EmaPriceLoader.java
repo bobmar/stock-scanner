@@ -46,7 +46,7 @@ public class EmaPriceLoader implements BatchJob {
   public BatchStatus run() {
     BatchStatus status = new BatchStatus(FinancialRatioLoader.class);
     List<StockTicker> tickers = tickerSvc.retrieveTickerList();
-    int updatedPrices = this.process(tickers.subList(0,2));
+    int updatedPrices = this.process(tickers);
     LOGGER.info("run - added EMA to {} prices", updatedPrices);
     status.setFinishDate(LocalDateTime.now());
     status.setSuccess(Boolean.TRUE);
