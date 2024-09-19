@@ -1,12 +1,5 @@
 package org.rhm.stock.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.rhm.stock.controller.dto.TickerInfo;
 import org.rhm.stock.domain.IbdStatistic;
 import org.rhm.stock.domain.StockPrice;
@@ -28,6 +21,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TickerService {
@@ -61,12 +57,8 @@ public class TickerService {
 				stockTicker.setCompanyName((String) companyInfo.get("companyName"));
 				stockTicker.setIndustryName((String) companyInfo.get("industry"));
 				stockTicker.setSectorName((String) companyInfo.get("sector"));
-				if (tickerRepo.insert(stockTicker) != null) {
-					message = tickerSymbol + "/" + stockTicker.getCompanyName() + " was successfully created";
-				}
-				else {
-					message = "Failed to create entry for " + tickerSymbol;
-				}
+				tickerRepo.insert(stockTicker);
+				message = tickerSymbol + "/" + stockTicker.getCompanyName() + " was successfully created";
 			}
 		}
 		return message;
@@ -91,39 +83,6 @@ public class TickerService {
 		return tickersSavedCnt;
 	}
 	
-	public String createTicker(TickerInfo tickerInfo) {
-		String message = null;
-		StockTicker stockTicker = null;
-		if (tickerRepo.existsById(tickerInfo.getTickerSymbol())) {
-			message = String.format("Ticker %s already exists", tickerInfo.getTickerSymbol());
-		}
-		else {
-			stockTicker = new StockTicker();
-			stockTicker.setTickerSymbol(tickerInfo.getTickerSymbol());
-			stockTicker.setCompanyName(tickerInfo.getCompanyName());
-			stockTicker.setIndustryName(tickerInfo.getIndustry());
-			stockTicker.setSectorName(tickerInfo.getSector());
-			if (tickerRepo.insert(stockTicker) != null) {
-				message = String.format("%s/%s was successfully created", stockTicker.getTickerSymbol(), stockTicker.getCompanyName());
-			}
-			else {
-				message = String.format("Failed to create entry for %s", tickerInfo.getTickerSymbol());
-			}
-		}
-		return message;
-	}
-	
-	private String findCompanyName(List<IbdStatistic> ibdStatList, String tickerSymbol) {
-		String companyName = null;
-		for (IbdStatistic ibdStat: ibdStatList) {
-			if (tickerSymbol.equals(ibdStat.getTickerSymbol())) {
-				companyName = ibdStat.getCompanyName();
-				break;
-			}
-		}
-		return companyName;
-	}
-	
 	public List<TickerInfo> retrieveTickerInfo(byte[] workbookBytes) {
 		List<TickerInfo> tickerInfoList = new ArrayList<TickerInfo>();
 		ExcelTransformerResponse response = excel.extractTickerSymbols(workbookBytes);
@@ -134,24 +93,18 @@ public class TickerService {
 		for (String tickerSymbol: tickerList) {
 			ticker = new TickerInfo();
 			ticker.setTickerSymbol(tickerSymbol);
-			ticker.setCompanyName(this.findCompanyName(ibdStatList, tickerSymbol));
-			if (ticker.getCompanyName() != null) {
-				if (this.tickerExists(tickerSymbol)) {
-					ticker.setStatus("Ticker already exists; will not be created");
-				}
-				else {
-					ticker.setStatus("OK");
-					profile = this.findCompanyProfile(tickerSymbol);
-					if (profile != null && profile.get("companyName") != null) {
-						LOGGER.info("retrieveTickerInfo - company profile: {}", profile.toString());
-						ticker.setCompanyName((String) profile.get("companyName"));
-						ticker.setIndustry((String)profile.get("industry"));
-						ticker.setSector((String)profile.get("sector"));
-					}
-				}
+			if (this.tickerExists(tickerSymbol)) {
+				ticker.setStatus("Ticker already exists; will not be created");
 			}
 			else {
-				ticker.setStatus("No company name available");
+				ticker.setStatus("OK");
+				profile = this.findCompanyProfile(tickerSymbol);
+				if (profile != null && profile.get("companyName") != null) {
+					LOGGER.info("retrieveTickerInfo - company profile: {}", profile.toString());
+					ticker.setCompanyName((String) profile.get("companyName"));
+					ticker.setIndustry((String)profile.get("industry"));
+					ticker.setSector((String)profile.get("sector"));
+				}
 			}
 			tickerInfoList.add(ticker);
 			LOGGER.info("retrieveTickerInfo - " + ticker.getTickerSymbol() + ":" + ticker.getStatus());
