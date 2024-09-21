@@ -45,11 +45,11 @@ public class DailyPriceVsAvgTest {
     StockPrice price = new StockPrice();
     price.setPriceId("ZZZ:2023-12-24");
     price.setTickerSymbol("ZZZ");
-    price.setClosePrice(100.0);
+    price.setClosePrice(125.0);
     AveragePrice avgPrice = new AveragePrice();
     avgPrice.setAvgPrice(100.0);
     StockStatistic stat = dlyPriceVsAvg.calcPriceVsAvg(price, 20, DLY_PRC_VS_20_DAY_AVG, avgPrice);
-    Assertions.assertEquals(1.0, stat.getStatisticValue());
+    Assertions.assertEquals(1.25, stat.getStatisticValue());
     Assertions.assertEquals(String.format("%s:%s", price.getPriceId(), DLY_PRC_VS_20_DAY_AVG), stat.getStatId());
     Assertions.assertNotNull(stat);
   }
