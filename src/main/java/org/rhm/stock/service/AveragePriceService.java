@@ -69,6 +69,7 @@ public class AveragePriceService {
 
 	public Map<String,Object> retrieveEma(String tickerSymbol, String period, String earliestDate) {
 		Map<String,Object> emaPriceMap = new HashMap<>();
+		LOGGER.info("retrieveEma - ticker: {} period: {} earliestDate: {}", tickerSymbol, period, earliestDate);
 		List<Map<String,Object>> emaList = this.coInfo.retrieveEma(tickerSymbol, period);
 		if (null != emaList) {
 			for (Map<String,Object> emaEntry: emaList) {

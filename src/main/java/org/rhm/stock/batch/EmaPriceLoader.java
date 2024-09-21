@@ -4,7 +4,6 @@ import org.rhm.stock.domain.StockAveragePrice;
 import org.rhm.stock.domain.StockTicker;
 import org.rhm.stock.service.AveragePriceService;
 import org.rhm.stock.service.BatchStatusService;
-import org.rhm.stock.service.PriceService;
 import org.rhm.stock.service.TickerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
