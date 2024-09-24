@@ -1,7 +1,5 @@
 package org.rhm.stock.handler.stat;
 
-import java.util.List;
-
 import org.rhm.stock.domain.AveragePrice;
 import org.rhm.stock.domain.StockAveragePrice;
 import org.rhm.stock.domain.StockPrice;
@@ -13,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @Qualifier("dailyPriceVsAvg")
@@ -78,7 +78,6 @@ public class DailyPriceVsAvg implements StatisticCalculator {
 		AveragePrice avgPrice = this.findAvgPrice(price.getPriceId(), days);
 		if (avgPrice != null) {
 			if (avgPrice.getEmaPrice() != null) {
-				logger.info("calcCurrVsEma - {} {} days {}", price.getPriceId(), days, statType);
 				double priceVsEma = (price.getClosePrice() / avgPrice.getEmaPrice());
 				stat = new StockStatistic(price.getPriceId(), statType, priceVsEma, price.getTickerSymbol(), price.getPriceDate());
 				statSvc.createStatistic(stat,false);
