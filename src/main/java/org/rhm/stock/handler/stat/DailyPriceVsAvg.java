@@ -1,7 +1,5 @@
 package org.rhm.stock.handler.stat;
 
-import java.util.List;
-
 import org.rhm.stock.domain.AveragePrice;
 import org.rhm.stock.domain.StockAveragePrice;
 import org.rhm.stock.domain.StockPrice;
@@ -13,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @Qualifier("dailyPriceVsAvg")

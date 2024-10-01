@@ -124,7 +124,7 @@ public class TickerService {
 			ibdStat.getListName().add(listName);
 			if (mrIbdStat != null) {
 				priceList = priceRepo.findByTickerSymbolAndPriceDateGreaterThan(mrIbdStat.getTickerSymbol(), mrIbdStat.getPriceDate());
-				if (priceList != null && priceList.size() > 0) {
+				if (priceList != null && !priceList.isEmpty()) {
 					priceList.forEach(price->{
 						this.createIbdStat(ibdStat, price.getPriceId(), price.getPriceDate());
 					}); 
