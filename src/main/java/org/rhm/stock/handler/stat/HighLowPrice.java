@@ -1,7 +1,5 @@
 package org.rhm.stock.handler.stat;
 
-import java.util.List;
-
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.domain.StockStatistic;
 import org.rhm.stock.service.StatisticService;
@@ -10,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @Qualifier("highLowPriceCalc")
@@ -21,11 +21,9 @@ public class HighLowPrice implements StatisticCalculator {
 	private static final String LOW_PRICE_11WK = "LOPR11WK";
 	private static final String LOW_PRICE_4WK = "LOPR4WK";
 	private static final String LOW_PRICE_2WK = "LOPR2WK";
-	private static final int GREATER_THAN = 1;
-	private static final int LESS_THAN = -1;
 	private Logger logger = LoggerFactory.getLogger(HighLowPrice.class);
 	@Autowired
-	private StatisticService statSvc = null;
+	private StatisticService statSvc;
 
 	private void calcHigh(List<StockPrice> priceSubList, String statType) {
 		StockPrice highPrice = null, firstPrice = priceSubList.get(0);
@@ -35,14 +33,14 @@ public class HighLowPrice implements StatisticCalculator {
 			}
 			else {
 				logger.debug("calcHigh - " + statType + " high price=" + highPrice.getHighPrice() + "|current price=" + price.getHighPrice());
-				if (price.getHighPrice().compareTo(highPrice.getHighPrice()) == GREATER_THAN) {
+				if (price.getHighPrice().compareTo(highPrice.getHighPrice()) > 0) {
 					highPrice = price;
 					logger.debug("calcHigh - replaced the high price");
 				}
 			}
 		}
 		statSvc.createStatistic(
-				new StockStatistic(firstPrice.getPriceId(), statType, highPrice.getHighPrice().doubleValue(), firstPrice.getTickerSymbol(), firstPrice.getPriceDate())
+				new StockStatistic(firstPrice.getPriceId(), statType, highPrice.getHighPrice(), firstPrice.getTickerSymbol(), firstPrice.getPriceDate())
 				,false);
 	}
 	
@@ -54,14 +52,14 @@ public class HighLowPrice implements StatisticCalculator {
 			}
 			else {
 				logger.debug("calcLow - " + statType + " low price=" + lowPrice.getLowPrice() + "|current price=" + price.getLowPrice());
-				if (price.getLowPrice().compareTo(lowPrice.getLowPrice()) == LESS_THAN) {
+				if (price.getLowPrice().compareTo(lowPrice.getLowPrice()) < 0) {
 					lowPrice = price;
 					logger.debug("calcLow - replaced the low price");
 				}
 			}
 		}
 		statSvc.createStatistic(
-				new StockStatistic(firstPrice.getPriceId(), statType, lowPrice.getLowPrice().doubleValue(), firstPrice.getTickerSymbol(), firstPrice.getPriceDate())
+				new StockStatistic(firstPrice.getPriceId(), statType, lowPrice.getLowPrice(), firstPrice.getTickerSymbol(), firstPrice.getPriceDate())
 				,false);
 	}
 	
