@@ -24,14 +24,14 @@ public class PriceChg implements StatisticCalculator {
 	private static final String STAT_8WK_PRC_CHG = "PCTCHG8WK";
 	private static final String STAT_12WK_PRC_CHG = "PCTCHG12WK";
 
-	private Logger logger = LoggerFactory.getLogger(StatisticService.class);
+	private final Logger LOGGER = LoggerFactory.getLogger(StatisticService.class);
 	
 	private void calcChange(StockPrice currPrice, StockPrice prevPrice, String statPctChgCode, String statPrcChgCode) {
-		Double priceChg = (currPrice.getClosePrice().doubleValue() - prevPrice.getClosePrice().doubleValue());
-		logger.debug("calcChange - price change amt for " + currPrice.getPriceId() + " is " + priceChg.doubleValue());
-		logger.debug("calcChange - " + prevPrice.getPriceId() + " closing price=" + prevPrice.getClosePrice());
-		logger.debug("calcChange - " + currPrice.getPriceId() + " closing price=" + currPrice.getClosePrice());
-		double quotient = priceChg.doubleValue() / prevPrice.getClosePrice().doubleValue();
+		Double priceChg = (currPrice.getClosePrice() - prevPrice.getClosePrice());
+		LOGGER.debug("calcChange - price change amt for " + currPrice.getPriceId() + " is " + priceChg);
+		LOGGER.debug("calcChange - " + prevPrice.getPriceId() + " closing price=" + prevPrice.getClosePrice());
+		LOGGER.debug("calcChange - " + currPrice.getPriceId() + " closing price=" + currPrice.getClosePrice());
+		double quotient = priceChg / prevPrice.getClosePrice();
 		Double pctChg = (quotient * 100);
 		statSvc.createStatistic(
 			new StockStatistic(currPrice.getPriceId(), statPctChgCode, pctChg, currPrice.getTickerSymbol(), currPrice.getPriceDate())
@@ -45,7 +45,7 @@ public class PriceChg implements StatisticCalculator {
 	
 	@Override
 	public void calculate(List<StockPrice> priceList) {
-		logger.info("calculate - processing " + priceList.size() + " prices for " + priceList.get(0).getTickerSymbol());
+		LOGGER.info("calculate - processing " + priceList.size() + " prices for " + priceList.get(0).getTickerSymbol());
 		while (priceList.size() > 2) {
 			this.calcChange(priceList.get(0), priceList.get(1), STAT_DLY_PCT_CHG, STAT_DLY_PRC_CHG);
 			if (priceList.size() > 5) {

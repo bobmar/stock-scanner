@@ -41,7 +41,7 @@ public class ExcelTransformer {
 			workbook = new HSSFWorkbook(is);
 		} 
 		catch (IOException e) {
-			e.printStackTrace();
+			logger.error("transformBytes - IOException: {}", e.getMessage());
 		}
 		return workbook;
 	}
