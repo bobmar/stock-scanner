@@ -21,11 +21,9 @@ public class HighLowPrice implements StatisticCalculator {
 	private static final String LOW_PRICE_11WK = "LOPR11WK";
 	private static final String LOW_PRICE_4WK = "LOPR4WK";
 	private static final String LOW_PRICE_2WK = "LOPR2WK";
-	private static final int GREATER_THAN = 1;
-	private static final int LESS_THAN = -1;
-	private Logger logger = LoggerFactory.getLogger(HighLowPrice.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HighLowPrice.class);
 	@Autowired
-	private StatisticService statSvc = null;
+	private StatisticService statSvc;
 
 	private void calcHigh(List<StockPrice> priceSubList, String statType) {
 		StockPrice highPrice = null, firstPrice = priceSubList.get(0);
@@ -34,15 +32,15 @@ public class HighLowPrice implements StatisticCalculator {
 				highPrice = price;
 			}
 			else {
-				logger.debug("calcHigh - " + statType + " high price=" + highPrice.getHighPrice() + "|current price=" + price.getHighPrice());
-				if (price.getHighPrice().compareTo(highPrice.getHighPrice()) == GREATER_THAN) {
+				LOGGER.debug("calcHigh - {} high price={}|current price={}", statType, highPrice.getHighPrice(), price.getHighPrice());
+				if (price.getHighPrice().compareTo(highPrice.getHighPrice()) > 0) {
 					highPrice = price;
-					logger.debug("calcHigh - replaced the high price");
+					LOGGER.debug("calcHigh - replaced the high price");
 				}
 			}
 		}
 		statSvc.createStatistic(
-				new StockStatistic(firstPrice.getPriceId(), statType, highPrice.getHighPrice().doubleValue(), firstPrice.getTickerSymbol(), firstPrice.getPriceDate())
+				new StockStatistic(firstPrice.getPriceId(), statType, highPrice.getHighPrice(), firstPrice.getTickerSymbol(), firstPrice.getPriceDate())
 				,false);
 	}
 	
@@ -53,21 +51,21 @@ public class HighLowPrice implements StatisticCalculator {
 				lowPrice = price;
 			}
 			else {
-				logger.debug("calcLow - " + statType + " low price=" + lowPrice.getLowPrice() + "|current price=" + price.getLowPrice());
-				if (price.getLowPrice().compareTo(lowPrice.getLowPrice()) == LESS_THAN) {
+				LOGGER.debug("calcLow - {} low price={}|current price={}", statType, lowPrice.getLowPrice(), price.getLowPrice());
+				if (price.getLowPrice().compareTo(lowPrice.getLowPrice()) < 0) {
 					lowPrice = price;
-					logger.debug("calcLow - replaced the low price");
+					LOGGER.debug("calcLow - replaced the low price");
 				}
 			}
 		}
 		statSvc.createStatistic(
-				new StockStatistic(firstPrice.getPriceId(), statType, lowPrice.getLowPrice().doubleValue(), firstPrice.getTickerSymbol(), firstPrice.getPriceDate())
+				new StockStatistic(firstPrice.getPriceId(), statType, lowPrice.getLowPrice(), firstPrice.getTickerSymbol(), firstPrice.getPriceDate())
 				,false);
 	}
 	
 	@Override
 	public void calculate(List<StockPrice> priceList) {
-		logger.info("calculate - processing " + priceList.size() + " prices for " + priceList.get(0).getTickerSymbol());
+		LOGGER.info("calculate - processing {} prices for {}", priceList.size(), priceList.get(0).getTickerSymbol());
 		while (priceList.size() > 55) {
 			this.calcHigh(priceList.subList(0, 54), HIGH_PRICE_11WK);
 			this.calcHigh(priceList.subList(0, 19), HIGH_PRICE_4WK);

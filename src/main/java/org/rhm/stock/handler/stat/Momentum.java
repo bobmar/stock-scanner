@@ -19,16 +19,16 @@ import org.springframework.stereotype.Component;
 @Qualifier("momentum")
 public class Momentum implements StatisticCalculator {
 	@Autowired
-	private StatisticService statSvc = null;
+	private StatisticService statSvc;
 	@Autowired
-	private AveragePriceService avgPriceSvc = null;
+	private AveragePriceService avgPriceSvc;
 
 	private static final String STAT_Z_SCORE = "ZSCORE";
 	private static final String STAT_TR_MOM = "TRMOM";
-	private List<StockAveragePrice> avgPriceList = null;
-	private List<StockStatistic> statList = null;
+	private List<StockAveragePrice> avgPriceList;
+	private List<StockStatistic> statList;
 	
-	private Logger logger = LoggerFactory.getLogger(Momentum.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(Momentum.class);
 	
 	private void init(String tickerSymbol) {
 		avgPriceList = avgPriceSvc.findAvgPriceList(tickerSymbol);
@@ -42,7 +42,7 @@ public class Momentum implements StatisticCalculator {
 		if (priceList.size() >= 50) {
 			oldPrice = priceList.get(49);
 			if (todayPrice != null && oldPrice != null) {
-				trMomentum = ((todayPrice.getClosePrice().doubleValue() / oldPrice.getClosePrice().doubleValue()) - 1);
+				trMomentum = ((todayPrice.getClosePrice() / oldPrice.getClosePrice()) - 1);
 				statSvc.createStatistic(
 					new StockStatistic(todayPrice.getPriceId(), STAT_TR_MOM, trMomentum, todayPrice.getTickerSymbol(), todayPrice.getPriceDate()));
 			}
@@ -86,19 +86,19 @@ public class Momentum implements StatisticCalculator {
 					}
 				}
 				stdDev = this.findStdDev(price.getPriceId());
-				if (avg50Day != null && (stdDev != null && stdDev.getStatisticValue().doubleValue() > 0)) {
-					logger.debug("calcZScore - priceID=" + price.getPriceId() + " 50-Day avg price=" + avg50Day.getAvgPrice() + "; closing price=" + price.getClosePrice() + "; std dev=" + stdDev.getStatisticValue());
-					zScore = ((price.getClosePrice().doubleValue() - avg50Day.getAvgPrice().doubleValue())
-						/stdDev.getStatisticValue().doubleValue());
+				if (avg50Day != null && (stdDev != null && stdDev.getStatisticValue() > 0)) {
+					LOGGER.debug("calcZScore - priceID={} 50-Day avg price={}; closing price={}; std dev={}", price.getPriceId(), avg50Day.getAvgPrice(), price.getClosePrice(), stdDev.getStatisticValue());
+					zScore = ((price.getClosePrice() - avg50Day.getAvgPrice())
+						/ stdDev.getStatisticValue());
 					statSvc.createStatistic(
 						new StockStatistic(price.getPriceId(), STAT_Z_SCORE, zScore, price.getTickerSymbol(), price.getPriceDate()));
 				}
 				else {
-					logger.warn("calcZScore - unable to find standard deviation for " + price.getPriceId());
+					LOGGER.warn("calcZScore - unable to find standard deviation for {}", price.getPriceId());
 				}
 			}
 			else {
-				logger.warn("calcZScore - average price record for " + price.getPriceId() + " is not found");
+				LOGGER.warn("calcZScore - average price record for {} is not found", price.getPriceId());
 			}
 		}
 	}
@@ -106,7 +106,7 @@ public class Momentum implements StatisticCalculator {
 	@Override
 	public void calculate(List<StockPrice> priceList) {
 		List<StockPrice> workList = new ArrayList<StockPrice>();
-		logger.info("calculate - processing " + priceList.size() + " prices for " + priceList.get(0).getTickerSymbol());
+		LOGGER.info("calculate - processing " + priceList.size() + " prices for " + priceList.get(0).getTickerSymbol());
 		this.init(priceList.get(0).getTickerSymbol());
 		this.calcZScore(priceList);
 		workList.addAll(priceList);
