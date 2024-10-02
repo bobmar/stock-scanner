@@ -1,7 +1,5 @@
 package org.rhm.stock.handler.stat;
 
-import java.util.List;
-
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.domain.StockStatistic;
 import org.rhm.stock.service.StatisticService;
@@ -10,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @Qualifier("upDownVolCalc")
@@ -29,20 +29,20 @@ public class UpDownVolume implements StatisticCalculator {
 			currPrice = priceList.get(i);
 			prevPrice = priceList.get(i+1);
 			priceDiff = currPrice.getClosePrice() - prevPrice.getClosePrice();
-			LOGGER.debug("calcUpDownRatio - " + currPrice.getTickerSymbol() + " curr price=" + currPrice.getClosePrice() + "; prev price=" + prevPrice.getClosePrice() + "; diff=" + priceDiff);
+			LOGGER.debug("calcUpDownRatio - {} curr price={}; prev price={}; diff={}", currPrice.getTickerSymbol(), currPrice.getClosePrice(), prevPrice.getClosePrice(), priceDiff);
 			if (priceDiff >= 0) {
 				upVolume += currPrice.getVolume();
-				LOGGER.debug("calcUpDownRatio - up volume=" + upVolume);
+				LOGGER.debug("calcUpDownRatio - up volume={}", upVolume);
 			}
 			else {
 				downVolume += currPrice.getVolume();
-				LOGGER.debug("calcUpDownRatio - down volume=" + downVolume);
+				LOGGER.debug("calcUpDownRatio - down volume={}", downVolume);
 			}
 		}
-		LOGGER.debug("calcUpDownRatio - " + currPrice.getTickerSymbol() + " up volume=" + upVolume + "/ down volume=" + downVolume);
+		LOGGER.debug("calcUpDownRatio - {} up volume={}/ down volume={}", currPrice.getTickerSymbol(), upVolume, downVolume);
 		if (downVolume > 0) {
 			upDownRatio = upVolume / downVolume;
-			LOGGER.debug("calcUpDownRatio - up/down ratio=" + upDownRatio);
+			LOGGER.debug("calcUpDownRatio - up/down ratio={}", upDownRatio);
 			statSvc.createStatistic(
 				new StockStatistic(firstPrice.getPriceId(), UP_DOWN_VOL_50, upDownRatio, firstPrice.getTickerSymbol(), firstPrice.getPriceDate())
 				,false);
@@ -51,9 +51,9 @@ public class UpDownVolume implements StatisticCalculator {
 	
 	@Override
 	public void calculate(List<StockPrice> priceList) {
-		LOGGER.info("calculate - processing " + priceList.size() + " prices for " + priceList.get(0).getTickerSymbol());
+		LOGGER.info("calculate - processing {} prices for {}", priceList.size(), priceList.get(0).getTickerSymbol());
 		while (priceList.size() > 51) {
-			LOGGER.debug("calculate - price list contains " + priceList.size() + " entries");
+			LOGGER.debug("calculate - price list contains {} entries", priceList.size());
 			this.calcUpDownRatio(priceList.subList(0, 50));
 			priceList.remove(0);
 		}
