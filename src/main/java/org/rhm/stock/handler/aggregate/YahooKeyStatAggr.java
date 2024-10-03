@@ -1,12 +1,5 @@
 package org.rhm.stock.handler.aggregate;
 
-import java.math.BigDecimal;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.rhm.stock.domain.KeyStatAggregate;
 import org.rhm.stock.domain.YahooKeyStatistic;
 import org.rhm.stock.service.KeyStatService;
@@ -15,8 +8,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 @Component
 @Qualifier("yahooStatAggr")
+@Deprecated
 public class YahooKeyStatAggr implements AggregatorHandler {
 	private Logger logger = LoggerFactory.getLogger(YahooKeyStatAggr.class);
 	@Autowired

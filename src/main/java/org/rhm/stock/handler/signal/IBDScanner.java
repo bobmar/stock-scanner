@@ -1,9 +1,5 @@
 package org.rhm.stock.handler.signal;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.List;
-
 import org.rhm.stock.domain.IbdStatistic;
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.domain.StockSignal;
@@ -15,6 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 @Component
 @Qualifier("ibdScanner")
@@ -33,18 +33,18 @@ public class IBDScanner implements SignalScanner {
 	private static final String SIGNAL_MGMT_GE5 = "IBDMGMT5";
 
 	@Autowired
-	private TickerService tickerSvc = null;
+	private TickerService tickerSvc;
 	@Autowired
-	private PriceService priceSvc = null;
+	private PriceService priceSvc;
 	@Autowired
-	private SignalService signalSvc = null;
+	private SignalService signalSvc;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-	private Logger logger = LoggerFactory.getLogger(IBDScanner.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(IBDScanner.class);
 	
 	private void createSignal(IbdStatistic stat, String signal) {
 		StockPrice price = priceSvc.findStockPrice(stat.getTickerSymbol() + ":" + df.format(stat.getPriceDate()));
 		signalSvc.createSignal(new StockSignal(price, signal));
-		logger.info("createSignal - " + price.getPriceId() + "," + signal);
+		LOGGER.info("createSignal - {},{}", price.getPriceId(), signal);
 	}
 	
 	private void detectSignals(List<IbdStatistic> ibdStatList) {
@@ -55,7 +55,7 @@ public class IBDScanner implements SignalScanner {
 			}
 		}
 		catch (NumberFormatException e) {
-			logger.error("detectSignals - " + SIGNAL_COMPOSITE_INC + ":" + e.getMessage());
+			LOGGER.error("detectSignals - {}:{}", SIGNAL_COMPOSITE_INC, e.getMessage());
 		}
 		try {
 			if (Integer.valueOf(currStat.getRelativeStrength()).compareTo(Integer.valueOf(prevStat.getRelativeStrength())) > 0) {
@@ -63,17 +63,17 @@ public class IBDScanner implements SignalScanner {
 			}
 		}
 		catch (NumberFormatException e) {
-			logger.error("detectSignals - " + SIGNAL_RS_INC + ":" + e.getMessage());
+			LOGGER.error("detectSignals - {}:{}", SIGNAL_RS_INC, e.getMessage());
 		}
 		try {
-			if (Integer.valueOf(currStat.getRelativeStrength()).intValue() >= 90) {
-				if (Integer.valueOf(prevStat.getRelativeStrength()).intValue() < 90) {
+			if (Integer.parseInt(currStat.getRelativeStrength()) >= 90) {
+				if (Integer.parseInt(prevStat.getRelativeStrength()) < 90) {
 					this.createSignal(currStat, SIGNAL_RS_X90);
 				}
 			}
 		}
 		catch (NumberFormatException e) {
-			logger.error("detectSignals - " + SIGNAL_RS_X90 + ":" + e.getMessage());
+			LOGGER.error("detectSignals - {}:{}", SIGNAL_RS_X90, e.getMessage());
 		}
 	}
 	
@@ -93,7 +93,7 @@ public class IBDScanner implements SignalScanner {
 	@Override
 	public void scan(String tickerSymbol) {
 		List<IbdStatistic> ibdStatList = tickerSvc.findIbdStats(tickerSymbol);
-		logger.info("scan - found " + ibdStatList.size() + " IBD stats for " + tickerSymbol);
+		LOGGER.info("scan - found {} IBD stats for {}", ibdStatList.size(), tickerSymbol);
 		while (ibdStatList.size() >= 2) {
 			this.detectCurrSignal(ibdStatList.get(0));
 			this.detectSignals(ibdStatList.subList(0, 2));

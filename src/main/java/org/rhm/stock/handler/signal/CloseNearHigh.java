@@ -1,7 +1,5 @@
 package org.rhm.stock.handler.signal;
 
-import java.util.List;
-
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.domain.StockSignal;
 import org.rhm.stock.service.PriceService;
@@ -12,27 +10,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Qualifier("closeNearHigh")
 public class CloseNearHigh implements SignalScanner {
 	@Autowired
-	private PriceService priceSvc = null;
+	private PriceService priceSvc;
 	@Autowired
-	private SignalService signalSvc = null;
+	private SignalService signalSvc;
 	private static final String CLOSE_NEAR_HIGH_SIGNAL = "CLSHI";
-	private Logger logger = LoggerFactory.getLogger(CloseNearHigh.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CloseNearHigh.class);
 	private void evaluatePrice(StockPrice price) {
-		double highCloseRange = price.getHighPrice().doubleValue() - price.getClosePrice().doubleValue();
-		if (highCloseRange / price.getHighLowRange().doubleValue() < .1) {
+		double highCloseRange = price.getHighPrice() - price.getClosePrice();
+		if (highCloseRange / price.getHighLowRange() < .1) {
 			signalSvc.createSignal(new StockSignal(price, CLOSE_NEAR_HIGH_SIGNAL));
-			logger.debug("evaluatePrice - create close near high stat: high=" + price.getHighPrice() + "; low=" + price.getLowPrice() + "; close=" + price.getClosePrice());
+			LOGGER.debug("evaluatePrice - create close near high stat: high={}; low={}; close={}", price.getHighPrice(), price.getLowPrice(), price.getClosePrice());
 		}
 	}
 	
 	@Override
 	public void scan(String tickerSymbol) {
 		List<StockPrice> priceList = priceSvc.retrievePrices(tickerSymbol);
-		logger.info("scan - found " + priceList.size() + " prices for " + tickerSymbol);
+		LOGGER.info("scan - found {} prices for {}", priceList.size(), tickerSymbol);
 		for (StockPrice price: priceList) {
 			this.evaluatePrice(price);
 		}

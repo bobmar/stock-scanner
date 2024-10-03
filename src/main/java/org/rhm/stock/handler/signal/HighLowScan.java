@@ -1,7 +1,5 @@
 package org.rhm.stock.handler.signal;
 
-import java.util.List;
-
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.domain.StockSignal;
 import org.rhm.stock.domain.StockStatistic;
@@ -14,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Qualifier("highLowScan")
 public class HighLowScan implements SignalScanner {
@@ -24,16 +24,16 @@ public class HighLowScan implements SignalScanner {
 	private final static String LLLH_DN_SIGNAL = "LLLH3D";
 
 	@Autowired
-	private PriceService priceSvc = null;
+	private PriceService priceSvc;
 	@Autowired
-	private SignalService signalSvc = null;
+	private SignalService signalSvc;
 	@Autowired
-	private StatisticService statSvc = null;
-	private Logger logger = LoggerFactory.getLogger(HighLowScan.class);
+	private StatisticService statSvc;
+	private static final Logger LOGGER = LoggerFactory.getLogger(HighLowScan.class);
 	private void detectFollowThrough(StockPrice price, List<StockStatistic> statList, String signalType) {
 		int statIdx = -1;
 		for (int i = 0; i < statList.size(); i++) {
-			if (statList.get(i).getPriceDate().compareTo(price.getPriceDate()) == 1) {
+			if (statList.get(i).getPriceDate().compareTo(price.getPriceDate()) > 0) {
 				statIdx = i;
 			}
 			else {
@@ -43,16 +43,16 @@ public class HighLowScan implements SignalScanner {
 		switch (signalType) {
 		case HHHL_SIGNAL:
 			if (statIdx > 0 && 
-					(statList.get(statIdx).getStatisticValue().doubleValue() > 0 ||
-					statList.get(statIdx -1).getStatisticValue().doubleValue() > 0)
+					(statList.get(statIdx).getStatisticValue() > 0 ||
+              statList.get(statIdx - 1).getStatisticValue() > 0)
 				) {
 				signalSvc.createSignal(new StockSignal(price, HHHL_UP_SIGNAL));
 			}
 			break;
 		case LLLH_SIGNAL:
 			if (statIdx > 0 && 
-					(statList.get(statIdx).getStatisticValue().doubleValue() < 0 ||
-					statList.get(statIdx -1).getStatisticValue().doubleValue() < 0)
+					(statList.get(statIdx).getStatisticValue() < 0 ||
+              statList.get(statIdx - 1).getStatisticValue() < 0)
 				) {
 				signalSvc.createSignal(new StockSignal(price, LLLH_DN_SIGNAL));				
 			}
@@ -66,8 +66,8 @@ public class HighLowScan implements SignalScanner {
 		for (int i = 0; i < priceList.size() - 1; i++) {
 			currPrice = priceList.get(i);
 			prevPrice = priceList.get(i + 1);
-			if (currPrice.getHighPrice().compareTo(prevPrice.getHighPrice()) == 1
-					&& currPrice.getLowPrice().compareTo(prevPrice.getLowPrice()) == 1) {
+			if (currPrice.getHighPrice().compareTo(prevPrice.getHighPrice()) > 0
+					&& currPrice.getLowPrice().compareTo(prevPrice.getLowPrice()) > 0) {
 				days++;
 			}
 			else {
@@ -75,7 +75,7 @@ public class HighLowScan implements SignalScanner {
 			}
 		}
 		if (days == 3) {
-			logger.info("detectHigherHighHigherLow - " + currPrice.getPriceId() + " found higher high, higher low");
+			LOGGER.info("detectHigherHighHigherLow - " + currPrice.getPriceId() + " found higher high, higher low");
 			signalSvc.createSignal(new StockSignal(priceList.get(0), HHHL_SIGNAL));
 			this.detectFollowThrough(priceList.get(0), statList, HHHL_SIGNAL);
 		}
@@ -87,8 +87,8 @@ public class HighLowScan implements SignalScanner {
 		for (int i = 0; i < priceList.size() - 1; i++) {
 			currPrice = priceList.get(i);
 			prevPrice = priceList.get(i + 1);
-			if (currPrice.getHighPrice().compareTo(prevPrice.getHighPrice()) == -1
-					&& currPrice.getLowPrice().compareTo(prevPrice.getLowPrice()) == -1) {
+			if (currPrice.getHighPrice().compareTo(prevPrice.getHighPrice()) < 0
+					&& currPrice.getLowPrice().compareTo(prevPrice.getLowPrice()) < 0) {
 				days++;
 			}
 			else {
@@ -96,7 +96,7 @@ public class HighLowScan implements SignalScanner {
 			}
 		}
 		if (days == 3) {
-			logger.info("detectLowerLowLowerHigh - " + currPrice.getPriceId() + " found lower low, lower high" );
+			LOGGER.info("detectLowerLowLowerHigh - {} found lower low, lower high", currPrice.getPriceId());
 			signalSvc.createSignal(new StockSignal(priceList.get(0), LLLH_SIGNAL));
 			this.detectFollowThrough(priceList.get(0), statList, LLLH_SIGNAL);
 		}
@@ -106,8 +106,8 @@ public class HighLowScan implements SignalScanner {
 	public void scan(String tickerSymbol) {
 		List<StockPrice> priceList = priceSvc.retrievePrices(tickerSymbol);
 		List<StockStatistic> statList = statSvc.retrieveStatList(tickerSymbol, "DYPCTCHG");
-		logger.info("scan - found " + priceList.size() + " prices for " + tickerSymbol);
-		logger.info("scan - found " + statList.size() + " DYPCTCHG stats for " + tickerSymbol);
+		LOGGER.info("scan - found {} prices for {}", priceList.size(), tickerSymbol);
+		LOGGER.info("scan - found {} DYPCTCHG stats for {}", statList.size(), tickerSymbol);
 		while (priceList.size() > 4) {
 			this.detectHigherHighHigherLow(priceList.subList(0, 4), statList);
 			this.detectLowerLowLowerHigh(priceList.subList(0, 4), statList);

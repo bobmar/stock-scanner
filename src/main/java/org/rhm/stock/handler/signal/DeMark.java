@@ -1,7 +1,5 @@
 package org.rhm.stock.handler.signal;
 
-import java.util.List;
-
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.domain.StockSignal;
 import org.rhm.stock.service.PriceService;
@@ -12,14 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Qualifier("deMark")
 public class DeMark implements SignalScanner {
 	@Autowired
-	private PriceService priceSvc = null;
+	private PriceService priceSvc;
 	@Autowired
-	private SignalService signalSvc = null;
-	private Logger logger = LoggerFactory.getLogger(DeMark.class);
+	private SignalService signalSvc;
+	private static final Logger LOGGER = LoggerFactory.getLogger(DeMark.class);
 	private static final String BEARISH_PRICE_FLIP = "BEARFLIP";
 	private static final String BUY_SETUP = "BUYSETUP";
 	private static final String PERFECTED_BUY_SETUP = "PBUYSETUP";
@@ -30,14 +30,14 @@ public class DeMark implements SignalScanner {
 		if (priceList.size() >= 6) {
 			currPrice = priceList.get(currIdx);
 			earlierPrice = priceList.get(earlierIdx);
-			if (currPrice.getClosePrice().compareTo(earlierPrice.getClosePrice()) == -1) {
+			if (currPrice.getClosePrice().compareTo(earlierPrice.getClosePrice()) < 0) {
 				conditionFound++;
 			}
 			currIdx++;
 			earlierIdx++;
 			currPrice = priceList.get(currIdx);
 			earlierPrice = priceList.get(earlierIdx);
-			if (currPrice.getClosePrice().compareTo(earlierPrice.getClosePrice()) == 1) {
+			if (currPrice.getClosePrice().compareTo(earlierPrice.getClosePrice()) > 0) {
 				conditionFound++;
 			}
 		}
@@ -51,7 +51,7 @@ public class DeMark implements SignalScanner {
 			for (int i = 0; i < 9; i++) {
 				currPrice = priceList.get(i);
 				earlierPrice = priceList.get(i+4);
-				if (currPrice.getClosePrice().compareTo(earlierPrice.getClosePrice()) == -1) {
+				if (currPrice.getClosePrice().compareTo(earlierPrice.getClosePrice()) < 0) {
 					conditionFound++;
 				}
 			}
@@ -66,11 +66,11 @@ public class DeMark implements SignalScanner {
 		for (int i = 0; i < 2; i++) {
 			currPrice = priceList.get(i);
 			earlierPrice = priceList.get(2);
-			if (currPrice.getLowPrice().compareTo(earlierPrice.getLowPrice()) == -1) {
+			if (currPrice.getLowPrice().compareTo(earlierPrice.getLowPrice()) < 0) {
 				conditionFound++;
 			}
 			earlierPrice = priceList.get(3);
-			if (currPrice.getLowPrice().compareTo(earlierPrice.getLowPrice()) == -1) {
+			if (currPrice.getLowPrice().compareTo(earlierPrice.getLowPrice()) < 0) {
 				conditionFound++;
 			}
 			
@@ -96,7 +96,7 @@ public class DeMark implements SignalScanner {
 	@Override
 	public void scan(String tickerSymbol) {
 		List<StockPrice> priceList = priceSvc.retrievePrices(tickerSymbol);
-		logger.info("scan - found " + priceList.size() + " prices for " + tickerSymbol);
+		LOGGER.info("scan - found {} prices for {}", priceList.size(), tickerSymbol);
 		while (priceList.size() > 14) {
 			this.detectDeMarkIndicators(priceList);
 			priceList.remove(0);
