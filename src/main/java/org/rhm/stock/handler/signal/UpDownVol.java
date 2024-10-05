@@ -17,12 +17,12 @@ import org.springframework.stereotype.Component;
 @Qualifier("upDownVol")
 public class UpDownVol implements SignalScanner {
 	@Autowired
-	private SignalService sigSvc = null;
+	private SignalService sigSvc;
 	@Autowired
-	private StatisticService statSvc = null;
+	private StatisticService statSvc;
 	@Autowired
-	private PriceService priceSvc = null;
-	private Logger logger = LoggerFactory.getLogger(UpDownVol.class);
+	private PriceService priceSvc;
+	private static final Logger LOGGER = LoggerFactory.getLogger(UpDownVol.class);
 	private static final String UPDN_INC_SIGNAL = "UPDNVOLINCR";
 	private static final String UPD_3_4_SIGNAL = "UPDNVOL3_4";
 	private static final String UPD_4_5_SIGNAL = "UPDNVOL4_5";
@@ -34,7 +34,7 @@ public class UpDownVol implements SignalScanner {
 		if (statList.size() > 1) {
 			currStat = statList.get(0);
 			prevStat = statList.get(1);
-			if (currStat.getStatisticValue().compareTo(prevStat.getStatisticValue()) == 1) {
+			if (currStat.getStatisticValue().compareTo(prevStat.getStatisticValue()) > 0) {
 				sigSvc.createSignal(new StockSignal(priceSvc.findStockPrice(currStat.getPriceId()), UPDN_INC_SIGNAL));
 			}
 			checkRange(currStat);
@@ -43,18 +43,18 @@ public class UpDownVol implements SignalScanner {
 	
 	private void checkRange(StockStatistic stat) {
 		StockSignal signal = null;
-		if (stat.getStatisticValue().doubleValue() > 1.0) {
+		if (stat.getStatisticValue() > 1.0) {
 			signal = new StockSignal(priceSvc.findStockPrice(stat.getPriceId()), UPD_GT1_SIGNAL);
 		}
-		if (stat.getStatisticValue().doubleValue() >= 3.0 && stat.getStatisticValue().doubleValue() < 4.0) {
+		if (stat.getStatisticValue() >= 3.0 && stat.getStatisticValue() < 4.0) {
 			signal = new StockSignal(priceSvc.findStockPrice(stat.getPriceId()), UPD_3_4_SIGNAL);
 		}
 		else {
-			if (stat.getStatisticValue().doubleValue() >= 4.0 && stat.getStatisticValue().doubleValue() < 5.0) {
+			if (stat.getStatisticValue() >= 4.0 && stat.getStatisticValue() < 5.0) {
 				signal = new StockSignal(priceSvc.findStockPrice(stat.getPriceId()), UPD_4_5_SIGNAL);
 			}
 			else {
-				if (stat.getStatisticValue().doubleValue() >= 5.0 && stat.getStatisticValue().doubleValue() < 6.0) {
+				if (stat.getStatisticValue() >= 5.0 && stat.getStatisticValue() < 6.0) {
 					signal = new StockSignal(priceSvc.findStockPrice(stat.getPriceId()), UPD_5_6_SIGNAL);
 				}
 			}
@@ -67,7 +67,7 @@ public class UpDownVol implements SignalScanner {
 	@Override
 	public void scan(String tickerSymbol) {
 		List<StockStatistic> statList = statSvc.retrieveStatList(tickerSymbol, "UPDNVOL50");
-		logger.info("scan - found " + statList.size() + " UPDNVOL50 stats for " + tickerSymbol);
+		LOGGER.info("scan - found {} UPDNVOL50 stats for {}", statList.size(), tickerSymbol);
 		while (statList.size() > 2) {
 			this.detectIncrease(statList);
 			statList.remove(0);

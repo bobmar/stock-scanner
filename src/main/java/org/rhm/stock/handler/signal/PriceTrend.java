@@ -22,13 +22,13 @@ import org.springframework.stereotype.Component;
 @Qualifier("priceTrend")
 public class PriceTrend implements SignalScanner {
 	@Autowired
-	private StatisticService statSvc = null;
+	private StatisticService statSvc;
 	@Autowired
-	private SignalService signalSvc = null;
+	private SignalService signalSvc;
 	@Autowired
-	private AveragePriceService avgPriceSvc = null;
+	private AveragePriceService avgPriceSvc;
 	@Autowired
-	private PriceService priceSvc = null;
+	private PriceService priceSvc;
 	
 	private static final String WEEKLY_CLOSE_STAT = "WKCLSPCT";
 	private static final String UP_4_WEEKS_SIGNAL = "4WKUP";
@@ -41,7 +41,7 @@ public class PriceTrend implements SignalScanner {
 	private static final String RR_TRACKS = "RRTRK";
 	private static final String AVG_VOL_500K = "AVGVOL500K";
 	
-	private Logger logger = LoggerFactory.getLogger(PriceTrend.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PriceTrend.class);
 	
 	private void detectConsecutiveUpWeeks(List<StockStatistic> weeklyPriceChgList) {
 		int upCnt = 0;
@@ -50,7 +50,7 @@ public class PriceTrend implements SignalScanner {
 		StockPrice price = null;
 		for (int i = 0; i < 25; i+=5) {
 			stat = weeklyPriceChgList.get(i);
-			if (stat.getStatisticValue().doubleValue() > 0) {
+			if (stat.getStatisticValue() > 0) {
 				upCnt++;
 			}
 			else {
@@ -60,14 +60,14 @@ public class PriceTrend implements SignalScanner {
 		if (upCnt == 4) {
 			price = priceSvc.findStockPrice(firstStat.getPriceId());
 			signalSvc.createSignal(new StockSignal(price, UP_4_WEEKS_SIGNAL));
-			logger.debug("detectConsecutiveUpWeeks - 4 consecutive weeks up");
+			LOGGER.debug("detectConsecutiveUpWeeks - 4 consecutive weeks up");
 		}
 		else {
 			if (upCnt == 5) {
 				price = priceSvc.findStockPrice(firstStat.getPriceId());
 				signalSvc.createSignal(new StockSignal(price, UP_4_WEEKS_SIGNAL));
 				signalSvc.createSignal(new StockSignal(price, UP_5_WEEKS_SIGNAL));
-				logger.debug("detectConsecutiveUpWeeks - 5 consecutive weeks up");
+				LOGGER.debug("detectConsecutiveUpWeeks - 5 consecutive weeks up");
 			}
 		}
 	}
@@ -79,7 +79,7 @@ public class PriceTrend implements SignalScanner {
 		StockPrice price = null;
 		for (int i = 0; i < 25; i+=5) {
 			stat = weeklyPriceChgList.get(i);
-			if (stat.getStatisticValue().doubleValue() < 0) {
+			if (stat.getStatisticValue() < 0) {
 				downCnt++;
 			}
 			else {
@@ -89,14 +89,14 @@ public class PriceTrend implements SignalScanner {
 		if (downCnt == 4) {
 			price = priceSvc.findStockPrice(firstStat.getPriceId());
 			signalSvc.createSignal(new StockSignal(price, DN_4_WEEKS_SIGNAL));
-			logger.debug("detectConsecutiveDownWeeks - 4 consecutive weeks down");
+			LOGGER.debug("detectConsecutiveDownWeeks - 4 consecutive weeks down");
 		}
 		else {
 			if (downCnt == 5) {
 				price = priceSvc.findStockPrice(firstStat.getPriceId());
 				signalSvc.createSignal(new StockSignal(price, DN_4_WEEKS_SIGNAL));
 				signalSvc.createSignal(new StockSignal(price, DN_5_WEEKS_SIGNAL));
-				logger.debug("detectConsecutiveDownWeeks - 5 consecutive weeks down");
+				LOGGER.debug("detectConsecutiveDownWeeks - 5 consecutive weeks down");
 			}
 		}
 	}
@@ -104,7 +104,7 @@ public class PriceTrend implements SignalScanner {
 	private void detectRailroadTracks(List<StockStatistic> weeklyPriceChgList) {
 		StockStatistic currStat = weeklyPriceChgList.get(0), prevStat = weeklyPriceChgList.get(4);
 		StockPrice price = null;
-		double diff = currStat.getStatisticValue().doubleValue() - prevStat.getStatisticValue().doubleValue();
+		double diff = currStat.getStatisticValue() - prevStat.getStatisticValue();
 		if (diff > -.015 && diff < .015) {
 			price = priceSvc.findStockPrice(currStat.getPriceId());
 			signalSvc.createSignal(new StockSignal(price, RR_TRACKS));
@@ -120,24 +120,24 @@ public class PriceTrend implements SignalScanner {
 		for (AveragePrice ap: avgPrice.getAvgList()) {
 			switch (ap.getDaysCnt()) {
 			case 10:
-				ap10Day = ap.getAvgPrice().doubleValue();
-				av10Day = ap.getAvgVolume().intValue();
+				ap10Day = ap.getAvgPrice();
+				av10Day = ap.getAvgVolume();
 				avgPriceCnt++;
 				break;
 			case 50:
-				ap50Day = ap.getAvgPrice().doubleValue();
-				av50Day = ap.getAvgVolume().intValue();
+				ap50Day = ap.getAvgPrice();
+				av50Day = ap.getAvgVolume();
 				avgPriceCnt++;
 				break;
 			case 200:
-				ap200Day = ap.getAvgPrice().doubleValue();
-				av200Day = ap.getAvgVolume().intValue();
+				ap200Day = ap.getAvgPrice();
+				av200Day = ap.getAvgVolume();
 				avgPriceCnt++;
 				break;
 			}
 		}
 		if (avgPriceCnt == 3) {
-			logger.debug("detectTrend - 10 day=" + ap10Day + "; 50 day=" + ap50Day + "; 200 day=" + ap200Day);
+			LOGGER.debug("detectTrend - 10 day={}; 50 day={}; 200 day={}", ap10Day, ap50Day, ap200Day);
 			if (trendDirection.equals(PRICE_UPTREND_SIGNAL)) {
  				if (ap10Day > ap50Day && ap50Day > ap200Day) {
  					trend = true;
@@ -158,17 +158,17 @@ public class PriceTrend implements SignalScanner {
  		if (trend) {
  			price = priceSvc.findStockPrice(avgPrice.getPriceId());
  			signalSvc.createSignal(new StockSignal(price, trendDirection));
- 			logger.debug("detectTrend - created signal " + trendDirection + " for " + avgPrice.getPriceId());
+ 			LOGGER.debug("detectTrend - created signal {} for {}", trendDirection, avgPrice.getPriceId());
  		}
  		if (trendDirection.equals(PRICE_UPTREND_SIGNAL)) {
  	 		if (av10Day > av50Day && av50Day > av200Day) {
  	 			if (price == null) {
- 	 				logger.debug("detectTrend - looking for price: " + avgPrice.getPriceId());
+ 	 				LOGGER.debug("detectTrend - looking for price: {}", avgPrice.getPriceId());
  	 				try {
  	 	 				price = priceSvc.findStockPrice(avgPrice.getPriceId());
  	 				}
  	 				catch (NoSuchElementException e) {
- 	 					logger.error("detectTrend - " + avgPrice.getPriceId() + " " + e.getMessage());
+ 	 					LOGGER.error("detectTrend - {} {}", avgPrice.getPriceId(), e.getMessage());
  	 				}
  	 			}
  	 			if (price != null) {
@@ -180,7 +180,7 @@ public class PriceTrend implements SignalScanner {
 
 	private void minVolumeSignal(StockAveragePrice avgPrice) {
 		List<AveragePrice> avgList = avgPrice.getAvgList();
-		logger.debug("minVolumeSignal - get price for " + avgPrice.getPriceId());
+		LOGGER.debug("minVolumeSignal - get price for {}", avgPrice.getPriceId());
 		StockPrice price = priceSvc.findStockPrice(avgPrice.getPriceId());
 		for (AveragePrice avg: avgList) {
 			if (avg.getDaysCnt().equals(50)) {
@@ -197,7 +197,7 @@ public class PriceTrend implements SignalScanner {
 	@Override
 	public void scan(String tickerSymbol) {
 		List<StockStatistic> wkPrcChgList = statSvc.retrieveStatList(tickerSymbol, WEEKLY_CLOSE_STAT);
-		logger.info("scan - found " + wkPrcChgList.size() + " " + WEEKLY_CLOSE_STAT + " statistics for " + tickerSymbol);
+		LOGGER.info("scan - found {} {} statistics for {}", wkPrcChgList.size(), WEEKLY_CLOSE_STAT, tickerSymbol);
 		while (wkPrcChgList.size() > 25) {
 			this.detectConsecutiveUpWeeks(wkPrcChgList.subList(0, 25));
 			this.detectConsecutiveDownWeeks(wkPrcChgList.subList(0, 25));

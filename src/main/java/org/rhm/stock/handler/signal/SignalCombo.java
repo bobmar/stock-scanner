@@ -18,11 +18,11 @@ import org.springframework.stereotype.Component;
 @Qualifier("signalCombo")
 public class SignalCombo implements SignalScanner {
 	@Autowired
-	private SignalService signalSvc = null;
+	private SignalService signalSvc;
 	private static final String CONFIRM_BUY_SETUP = "SEQUENTIAL";
 	private static final String MOMENTUM_CANDIDATE = "MOMENTUM";
 	private static final String SIGNAL_MATCH = "|UPTREND|UPDNVOLINCR|AVGVOL500K|AVG20ABV200|";
-	private Logger logger = LoggerFactory.getLogger(SignalCombo.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SignalCombo.class);
 
 	private StockSignal cloneSignal(StockSignal signal) {
 		return cloneSignal(signal, CONFIRM_BUY_SETUP);
@@ -88,7 +88,7 @@ public class SignalCombo implements SignalScanner {
 	@Override
 	public void scan(String tickerSymbol) {
 		List<StockSignal> signalList = signalSvc.findSignalsByTicker(tickerSymbol);
-		logger.info("scan - found " + signalList.size() + " signals for " + tickerSymbol);
+		LOGGER.info("scan - found {} signals for {}", signalList.size(), tickerSymbol);
 		this.findMomentumCandidate(signalList);
 		while (signalList.size() > 5) {
 			this.evaluateTdSequential(signalList);

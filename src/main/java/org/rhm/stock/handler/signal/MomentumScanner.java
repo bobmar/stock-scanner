@@ -20,11 +20,11 @@ import org.springframework.stereotype.Component;
 @Qualifier("momentumScan")
 public class MomentumScanner implements SignalScanner {
 	@Autowired
-	private SignalService signalSvc = null;
+	private SignalService signalSvc;
 	@Autowired
-	private StatisticService statSvc = null;
+	private StatisticService statSvc;
 	@Autowired
-	private PriceService priceSvc = null;
+	private PriceService priceSvc;
 	
 	private static final String STAT_ZSCORE = "ZSCORE";
 	private static final String STAT_TRMOM = "TRMOM";
@@ -36,7 +36,7 @@ public class MomentumScanner implements SignalScanner {
 	private static final String SIGNAL_TR_XOVER = "TRXOVER";
 	private static final int DAYS_TO_CONSIDER = 5;
 	private Map<String,StockPrice> priceMap = new HashMap<String,StockPrice>();
-	private Logger logger = LoggerFactory.getLogger(MomentumScanner.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MomentumScanner.class);
 	
 	private StockPrice findStockPrice(String priceId) {
 		StockPrice price = priceMap.get(priceId);
@@ -52,11 +52,11 @@ public class MomentumScanner implements SignalScanner {
 		StockStatistic stat = null;
 		if (statList.size() > DAYS_TO_CONSIDER) {
 			for (int i = 0; i < DAYS_TO_CONSIDER; i++) {
-				if (statList.get(i).getStatisticValue().doubleValue() > 0) {
+				if (statList.get(i).getStatisticValue() > 0) {
 					posCnt++;
 				}
 				else {
-					if (statList.get(i).getStatisticValue().doubleValue() < 0) {
+					if (statList.get(i).getStatisticValue() < 0) {
 						negCnt++;
 					}
 				}
@@ -76,8 +76,8 @@ public class MomentumScanner implements SignalScanner {
 	}
 	
 	private void evaluateCrossOver(StockStatistic currStat, StockStatistic prevStat) {
-		if (prevStat.getStatisticValue().doubleValue() < 0) {
-			if (currStat.getStatisticValue().doubleValue() > 0) {
+		if (prevStat.getStatisticValue() < 0) {
+			if (currStat.getStatisticValue() > 0) {
 				signalSvc.createSignal(new StockSignal(this.findStockPrice(currStat.getPriceId()), currStat.getStatisticType().equals(STAT_ZSCORE)?SIGNAL_ZS_XOVER:SIGNAL_TR_XOVER));				
 			}
 		}
@@ -87,7 +87,7 @@ public class MomentumScanner implements SignalScanner {
 	public void scan(String tickerSymbol) {
 		List<StockStatistic> zScoreList = statSvc.retrieveStatList(tickerSymbol, STAT_ZSCORE);
 		List<StockStatistic> trMomList = statSvc.retrieveStatList(tickerSymbol, STAT_TRMOM);
-		logger.info("scan - scanning momentum scores for " + tickerSymbol);
+		LOGGER.info("scan - scanning momentum scores for {}", tickerSymbol);
 		while (zScoreList.size() > DAYS_TO_CONSIDER) {
 			this.evaluateMomentum(zScoreList);
 			this.evaluateCrossOver(zScoreList.get(0), zScoreList.get(1));

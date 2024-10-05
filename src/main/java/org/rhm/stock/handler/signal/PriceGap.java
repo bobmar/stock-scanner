@@ -15,43 +15,44 @@ import org.springframework.stereotype.Component;
 @Qualifier("priceGap")
 public class PriceGap implements SignalScanner {
 	@Autowired
-	private PriceService priceSvc = null;
+	private PriceService priceSvc;
 	@Autowired
-	private SignalService signalSvc = null;
+	private SignalService signalSvc;
 	
 	private static final String GAP_UP_SIGNAL = "GAPUP";
 	private static final String GAP_DN_SIGNAL = "GAPDN";
 	private static final String INSIDE_DAY_SIGNAL = "INSIDE";
-	private Logger logger = LoggerFactory.getLogger(PriceGap.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PriceGap.class);
 	
 	private boolean gapUp(StockPrice currPrice, StockPrice prevPrice) {
 		boolean gapUp = false;
-		if (currPrice.getLowPrice().compareTo(prevPrice.getHighPrice()) == 1) {
+		if (currPrice.getLowPrice().compareTo(prevPrice.getHighPrice()) > 0) {
 			gapUp = true;
-			logger.debug("gapUp - found gap up for " + currPrice.getPriceId());
+			LOGGER.debug("gapUp - found gap up for {}", currPrice.getPriceId());
 		}
 		return gapUp;
 	}
 	
 	private boolean gapDown(StockPrice currPrice, StockPrice prevPrice) {
 		boolean gapDown = false;
-		if (currPrice.getHighPrice().compareTo(prevPrice.getLowPrice()) == -1) {
+		if (currPrice.getHighPrice().compareTo(prevPrice.getLowPrice()) < 0) {
 			gapDown = true;
-			logger.debug("gapDown - found gap down for " + currPrice.getPriceId());
+			LOGGER.debug("gapDown - found gap down for {}", currPrice.getPriceId());
 		}
 		return gapDown;
 	}
 	
 	private void detectPriceGap(List<StockPrice> priceList) {
 		if (priceList.size() < 2) {
-			logger.warn("detectPriceGap -  need 2 prices for evaluation");
+			LOGGER.warn("detectPriceGap -  need 2 prices for evaluation");
 		}
 		else {
 			StockPrice currPrice = priceList.get(0), prevPrice = priceList.get(1);
-			logger.debug("detectPriceGap - check " + currPrice.getPriceId() 
-				+ " current open=" + currPrice.getOpenPrice() 
-				+ "; previous high=" + prevPrice.getHighPrice() 
-				+ "; previous low=" + prevPrice.getLowPrice());
+			LOGGER.debug("detectPriceGap - check {} current open={}; previous high={}; previous low={}"
+					, currPrice.getPriceId()
+					, currPrice.getOpenPrice()
+					, prevPrice.getHighPrice()
+					, prevPrice.getLowPrice());
 			if (this.gapUp(currPrice, prevPrice)) {
 				signalSvc.createSignal(new StockSignal(currPrice, GAP_UP_SIGNAL));
 			}
@@ -65,12 +66,12 @@ public class PriceGap implements SignalScanner {
 	
 	private void detectInsideDay(List<StockPrice> priceList) {
 		if (priceList.size() < 2) {
-			logger.warn("detectInsideDay - need 2 prices for evaluation");
+			LOGGER.warn("detectInsideDay - need 2 prices for evaluation");
 		}
 		else {
 			StockPrice currPrice = priceList.get(0), prevPrice = priceList.get(1);
-			if (currPrice.getHighPrice().doubleValue() < prevPrice.getHighPrice().doubleValue()) {
-				if (currPrice.getLowPrice().doubleValue() > prevPrice.getLowPrice().doubleValue()) {
+			if (currPrice.getHighPrice() < prevPrice.getHighPrice()) {
+				if (currPrice.getLowPrice() > prevPrice.getLowPrice()) {
 					signalSvc.createSignal(new StockSignal(currPrice, INSIDE_DAY_SIGNAL));
 				}
 			}
@@ -80,12 +81,12 @@ public class PriceGap implements SignalScanner {
 	@Override
 	public void scan(String tickerSymbol) {
 		List<StockPrice> priceList = priceSvc.retrievePrices(tickerSymbol);
-		logger.info("scan - found " + priceList.size() + " prices for " + tickerSymbol);
+		LOGGER.info("scan - found {} prices for {}", priceList.size(), tickerSymbol);
 		while (priceList.size() >= 2) {
 			this.detectPriceGap(priceList.subList(0, 2));
 			this.detectInsideDay(priceList.subList(0, 2));
 			priceList.remove(0);
-			logger.debug("scan - " + priceList.size() + " prices remaining");
+			LOGGER.debug("scan - {} prices remaining", priceList.size());
 		}
 	}
 }
