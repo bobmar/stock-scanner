@@ -1,14 +1,9 @@
 package org.rhm.stock;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.rhm.stock.batch.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
@@ -16,13 +11,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @SpringBootApplication
 @EnableCaching
 public class StockDataLoader implements CommandLineRunner {
 	@Autowired
 	private ApplicationContext ctx;
 
-	private Logger logger = LoggerFactory.getLogger(StockDataLoader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(StockDataLoader.class);
 	public static void main(String...args) {
 		SpringApplication app = new SpringApplication(StockDataLoader.class);
 		app.setWebApplicationType(WebApplicationType.NONE);
@@ -52,12 +51,6 @@ public class StockDataLoader implements CommandLineRunner {
 			case "SIGNALCNT":
 				jobList.add(ctx.getBean(SignalCountJob.class));
 				break;
-			case "KEYSTAT":
-				jobList.add(ctx.getBean(KeyStatLoader.class));
-				break;
-			case "AGGREGATOR":
-				jobList.add(ctx.getBean(AggregatorJob.class));
-				break;
 			case "FINRATIO":
 				jobList.add(ctx.getBean(FinancialRatioLoader.class));
 				break;
@@ -71,14 +64,14 @@ public class StockDataLoader implements CommandLineRunner {
 		}
 		LocalDateTime startTime = LocalDateTime.now();
 		for (BatchJob job: jobList) {
-			logger.info("run - batch job: " + job.getClass().getName());
+			LOGGER.info("run - batch job: " + job.getClass().getName());
 			BatchStatus status = job.run();
-			logger.info("run - batch job status: " + status.getCompletionMsg());
-			logger.info("run - batch job start: " + status.getStartDate());
-			logger.info("run - batch job finish: " + status.getFinishDate());
+			LOGGER.info("run - batch job status: " + status.getCompletionMsg());
+			LOGGER.info("run - batch job start: " + status.getStartDate());
+			LOGGER.info("run - batch job finish: " + status.getFinishDate());
 		}
 		LocalDateTime finishTime = LocalDateTime.now();
-		logger.info("run - batch start: " + startTime.toString());
-		logger.info("run - batch finish: " + finishTime.toString());
+		LOGGER.info("run - batch start: " + startTime.toString());
+		LOGGER.info("run - batch finish: " + finishTime.toString());
 	}
 }

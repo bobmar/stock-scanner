@@ -1,10 +1,5 @@
 package org.rhm.stock.batch;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Map;
-
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.domain.StockTicker;
 import org.rhm.stock.domain.YahooKeyStatistic;
@@ -20,6 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Map;
+@Deprecated
 @Component
 @Qualifier("keyStatLoader")
 public class KeyStatLoader implements BatchJob {

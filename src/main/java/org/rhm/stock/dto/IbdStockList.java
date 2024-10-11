@@ -1,14 +1,14 @@
 package org.rhm.stock.dto;
 
-import java.util.List;
-
 import org.rhm.stock.controller.dto.TickerInfo;
+
+import java.util.List;
 
 public class IbdStockList {
 
-	private String listName = null;
-	private String exportDate = null;
-	private List<TickerInfo> tickerList = null;
+	private String listName;
+	private String exportDate;
+	private List<TickerInfo> tickerList;
 	public String getListName() {
 		return listName;
 	}

@@ -1,14 +1,14 @@
 package org.rhm.stock.io;
 
-import java.math.BigDecimal;
+import org.rhm.stock.domain.YahooKeyStatistic;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
-import org.rhm.stock.domain.YahooKeyStatistic;
-
+@Deprecated
 public class YahooKeyStatFactory {
 
 	private static Double extractRaw(String key, Map<String,Object> value ) {

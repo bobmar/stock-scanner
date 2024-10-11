@@ -1,32 +1,31 @@
 package org.rhm.stock.dto;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class PriceBean {
-	private Date date = null;
-	private Double openPrice = null;
-	private Double highPrice = null;
-	private Double lowPrice = null;
-	private Double closePrice = null;
-	private Long volume = null;
-	private Double adjClose = null;
+	private Date date;
+	private Double openPrice;
+	private Double highPrice;
+	private Double lowPrice;
+	private Double closePrice;
+	private Long volume;
+	private Double adjClose;
 	private static final int DATE_INDX = 0;
 	private static final int OPEN_INDX = 1;
 	private static final int HIGH_INDX = 2;
 	private static final int LOW_INDX = 3;
 	private static final int CLOSE_INDX = 4;
 	private static final int VOLUME_INDX = 5;
-	private static final int ADJ_CLS_INDX = 5;
 	private static final String DATE_TEXT = "Date";
-	private DateFormat dtFmt = new SimpleDateFormat("yyyy-MM-dd");
+	private final DateFormat dtFmt = new SimpleDateFormat("yyyy-MM-dd");
 	private boolean dataLoaded = false;
-	private Logger logger = LoggerFactory.getLogger(PriceBean.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PriceBean.class);
 	public PriceBean(String priceCsv) {
 		dataLoaded = false;
 		this.parsePrice(priceCsv);
@@ -44,19 +43,14 @@ public class PriceBean {
 				date = dtFmt.parse(price[DATE_INDX]);
 				dataLoaded = true;
 			}
-			catch (ParseException e) {
+			catch (ParseException | NumberFormatException e) {
 				if (!priceData.startsWith("Date,Open,High,Low,Close")) {
-					logger.error(e.getMessage());
+					LOGGER.error(e.getMessage());
 				}
 			}
-			catch (NumberFormatException e) {
-				if (!priceData.startsWith("Date,Open,High,Low,Close")) {
-					logger.error(e.getMessage());
-				}
-			}
-		}
+    }
 		else {
-			logger.debug("parsePrice - skip header");
+			LOGGER.debug("parsePrice - skip header");
 		}
 	}
 	

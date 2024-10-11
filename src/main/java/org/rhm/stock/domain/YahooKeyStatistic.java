@@ -1,9 +1,9 @@
 package org.rhm.stock.domain;
 
-import java.time.LocalDate;
-
 import org.springframework.data.annotation.Id;
 
+import java.time.LocalDate;
+@Deprecated
 public class YahooKeyStatistic {
 	@Id
 	private String keyStatId;

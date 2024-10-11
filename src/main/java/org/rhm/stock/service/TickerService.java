@@ -72,7 +72,7 @@ public class TickerService {
 	
 	public int saveTickerList(List<TickerInfo> tickerList) {
 		int tickersSavedCnt = 0;
-		String status = null;
+		String status;
 		for (TickerInfo ticker: tickerList) {
 			status = this.createTicker(ticker.getTickerSymbol());
 			LOGGER.info("saveTickerList - {}", status);
@@ -88,8 +88,8 @@ public class TickerService {
 		ExcelTransformerResponse response = excel.extractTickerSymbols(workbookBytes);
 		List<IbdStatistic> ibdStatList = response.getIbdStatList();
 		List<String> tickerList = response.getTickerSymbols();
-		Map<String,Object> profile = null;
-		TickerInfo ticker = null;
+		Map<String,Object> profile;
+		TickerInfo ticker;
 		for (String tickerSymbol: tickerList) {
 			ticker = new TickerInfo();
 			ticker.setTickerSymbol(tickerSymbol);
@@ -97,17 +97,21 @@ public class TickerService {
 				ticker.setStatus("Ticker already exists; will not be created");
 			}
 			else {
-				ticker.setStatus("OK");
 				profile = this.findCompanyProfile(tickerSymbol);
 				if (profile != null && profile.get("companyName") != null) {
 					LOGGER.info("retrieveTickerInfo - company profile: {}", profile.toString());
+					ticker.setStatus("OK");
 					ticker.setCompanyName((String) profile.get("companyName"));
 					ticker.setIndustry((String)profile.get("industry"));
 					ticker.setSector((String)profile.get("sector"));
 				}
+				else {
+					LOGGER.warn("retrieveTickerInfo - company profile not found for {}", tickerSymbol);
+					ticker.setStatus("No company profile was found");
+				}
 			}
 			tickerInfoList.add(ticker);
-			LOGGER.info("retrieveTickerInfo - " + ticker.getTickerSymbol() + ":" + ticker.getStatus());
+			LOGGER.info("retrieveTickerInfo - {}:{}", ticker.getTickerSymbol(), ticker.getStatus());
 		}
 		this.loadIbdStatistics(response.getIbdStatList(), response.getListName());
 		return tickerInfoList.stream()

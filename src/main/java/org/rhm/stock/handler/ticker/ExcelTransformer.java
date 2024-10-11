@@ -1,11 +1,5 @@
 package org.rhm.stock.handler.ticker;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -16,16 +10,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class ExcelTransformer {
 
-	private Logger logger = LoggerFactory.getLogger(ExcelTransformer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExcelTransformer.class);
 	public ExcelTransformerResponse extractTickerSymbols(byte[] workbookBytes) {
 		List<String> tickerSymbols = new ArrayList<String>();
 		List<IbdStatistic> ibdStatList = new ArrayList<IbdStatistic>();
 		Workbook workbook = this.transformBytes(workbookBytes);
 		Sheet sheet = workbook.getSheetAt(0);
-		logger.info("extractTickerSymbols - first row=" + sheet.getFirstRowNum() + "; last row=" + sheet.getLastRowNum());
+		LOGGER.info("extractTickerSymbols - first row=" + sheet.getFirstRowNum() + "; last row=" + sheet.getLastRowNum());
 		String listName = this.processIbdRows(tickerSymbols, ibdStatList, sheet);
 		ExcelTransformerResponse response = new ExcelTransformerResponse();
 		response.setIbdStatList(ibdStatList);
@@ -41,7 +41,7 @@ public class ExcelTransformer {
 			workbook = new HSSFWorkbook(is);
 		} 
 		catch (IOException e) {
-			logger.error("transformBytes - IOException: {}", e.getMessage());
+			LOGGER.error("transformBytes - IOException: {}", e.getMessage());
 		}
 		return workbook;
 	}
@@ -59,14 +59,14 @@ public class ExcelTransformer {
 			if (row != null && row.getCell(0) != null) {
 				if (foundSymbolHdr) {
 					tickerSymbol = row.getCell(0).getStringCellValue();
-					logger.info("processIbdRows - " + i + ": " + tickerSymbol);
-					if (tickerSymbol.length() > 0) {
+					LOGGER.info("processIbdRows - " + i + ": " + tickerSymbol);
+					if (!tickerSymbol.isEmpty()) {
 						tickerList.add(tickerSymbol);
 					}
 					ibd = extractor.transformRow(row, columnNames);
 					if (ibd != null) {
 						ibdStatList.add(ibd);
-						logger.info("processIbdRows - " + ibd.toString());
+						LOGGER.info("processIbdRows - " + ibd.toString());
 					}
 				}
 				else {
@@ -75,7 +75,7 @@ public class ExcelTransformer {
 						Cell cell = null;
 						for (int j = 0; j < row.getLastCellNum(); j++) {
 							cell = row.getCell(j);
-							if (cell.getStringCellValue() != null && cell.getStringCellValue().length() > 0) {
+							if (cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()) {
 								columnNames.add(cell.getStringCellValue());
 							}
 						}
@@ -83,7 +83,7 @@ public class ExcelTransformer {
 					else {
 						if (row.getCell(0).getStringCellValue().trim().contains("Stock List:")) {
 							listName = row.getCell(1).getStringCellValue();
-							logger.info("processIbdRows - list: " + listName);
+							LOGGER.info("processIbdRows - list: " + listName);
 						}
 					}
 				}

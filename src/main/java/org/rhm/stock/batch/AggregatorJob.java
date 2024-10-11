@@ -4,7 +4,7 @@ import org.rhm.stock.handler.aggregate.AggregatorHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
+@Deprecated
 @Component
 @Qualifier("aggregatorJob")
 public class AggregatorJob implements BatchJob {

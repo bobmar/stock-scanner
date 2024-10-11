@@ -1,29 +1,29 @@
 package org.rhm.stock.domain;
 
+import org.springframework.data.annotation.Id;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
-
 public class IbdStatistic {
 
 	@Id
-	private String statId = null;
-	private String tickerSymbol = null;
-	private String companyName = null;
-	private Date priceDate = null;
-	private String compositeRating = null;
-	private String epsRating = null;
-	private String relativeStrength = null;
-	private String groupStrength = null;
-	private String accumDist = null;
-	private String salesMarginRoe = null;
-	private String industryRank = null;
-	private Double mgmtOwnPct = null;
+	private String statId;
+	private String tickerSymbol;
+	private String companyName;
+	private Date priceDate;
+	private String compositeRating;
+	private String epsRating;
+	private String relativeStrength;
+	private String groupStrength;
+	private String accumDist;
+	private String salesMarginRoe;
+	private String industryRank;
+	private Double mgmtOwnPct;
 	private Date createDate = Calendar.getInstance().getTime();
-	private List<String> listName = null;
+	private List<String> listName;
 	
 	public String getStatId() {
 		return statId;

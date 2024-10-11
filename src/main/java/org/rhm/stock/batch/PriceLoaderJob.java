@@ -1,11 +1,5 @@
 package org.rhm.stock.batch;
 
-import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.domain.StockTicker;
 import org.rhm.stock.service.BatchStatusService;
@@ -17,16 +11,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 @Qualifier("priceLoader")
 public class PriceLoaderJob implements BatchJob {
 	@Autowired
-	private TickerService tickerSvc = null;
+	private TickerService tickerSvc;
 	@Autowired
-	private PriceService priceSvc = null;
+	private PriceService priceSvc;
 	@Autowired
-	private BatchStatusService batchStatSvc = null;
-	private Logger logger = LoggerFactory.getLogger(PriceLoaderJob.class);
+	private BatchStatusService batchStatSvc ;
+	private final static Logger LOGGER = LoggerFactory.getLogger(PriceLoaderJob.class);
 	private Date oldestAcceptableDate = null;
 	public PriceLoaderJob() {
 		Calendar cal = Calendar.getInstance();
@@ -46,24 +46,24 @@ public class PriceLoaderJob implements BatchJob {
 		if (cnt < days) {
 			days = 540;
 		}
-		logger.info("processTicker - retrieve prices for {}", tickerSymbol);
+		LOGGER.info("processTicker - retrieve prices for {}", tickerSymbol);
 		List<StockPrice> priceList = priceSvc.retrieveSourcePrices(tickerSymbol, days);
-		logger.debug("processTicker - found {} prices for {}", priceList.size(), tickerSymbol);
+		LOGGER.debug("processTicker - found {} prices for {}", priceList.size(), tickerSymbol);
 		Date mostRecentPriceDate = null;
 		if (!priceList.isEmpty()) {
 			if (priceSvc.saveStockPrice(priceList) != null) {
 				success = true;
 				mostRecentPriceDate = findMostRecentPriceDate(priceList);
-				logger.info("processTicker - {} saved {} prices", tickerSymbol, priceList.size());
-				logger.info("processTicker - {} latest price date: {}", tickerSymbol, mostRecentPriceDate);
+				LOGGER.info("processTicker - {} saved {} prices", tickerSymbol, priceList.size());
+				LOGGER.info("processTicker - {} latest price date: {}", tickerSymbol, mostRecentPriceDate);
 			}
-			if (oldestAcceptableDate.compareTo(mostRecentPriceDate) == 1) {
-				logger.warn("processTicker - ** most recent price is " + mostRecentPriceDate + "/oldest acceptable is " + oldestAcceptableDate + "; will delete ticker");
+			if (oldestAcceptableDate.compareTo(mostRecentPriceDate) > 0) {
+				LOGGER.warn("processTicker - ** most recent price is {}/oldest acceptable is {}; will delete ticker", mostRecentPriceDate, oldestAcceptableDate);
 				tickerSvc.deleteTicker(tickerSymbol);
 			}
 		}
 		else {
-			logger.error("processTicker - {} error during price download", tickerSymbol);
+			LOGGER.error("processTicker - {} error during price download", tickerSymbol);
 			tickerSvc.deleteTicker(tickerSymbol);
 		}
 		return success;
@@ -72,25 +72,9 @@ public class PriceLoaderJob implements BatchJob {
 	private int processTickers(List<StockTicker> tickerList) {
 		int status = 100;
 		int tickerCnt = 0;
-		int numPerInterval = 30;
-		final long interval = 60000;
-		long checkPoint = System.currentTimeMillis();
-		long timeRemaining = -1;
 		for (StockTicker ticker: tickerList) {
 			if (this.processTicker(ticker.getTickerSymbol())) {
 				tickerCnt++;
-				if (tickerCnt >= numPerInterval && tickerCnt % numPerInterval == 0) {
-					timeRemaining = System.currentTimeMillis() - checkPoint;
-					if (timeRemaining > 0) {
-            try {
-              Thread.sleep(timeRemaining);
-            } catch (InterruptedException e) {
-              throw new RuntimeException(e);
-            }
-          }
-					checkPoint = System.currentTimeMillis();
-					System.gc();
-				}
 			}
 		}
 		if (tickerCnt == tickerList.size()) {
@@ -103,7 +87,7 @@ public class PriceLoaderJob implements BatchJob {
 	public BatchStatus run() {
 		BatchStatus status = new BatchStatus(this.getClass());
 		List<StockTicker> tickerList = tickerSvc.retrieveTickerList();
-		logger.debug("run - processing " + tickerList.size() + " tickers");
+		LOGGER.debug("run - processing " + tickerList.size() + " tickers");
 		if (this.processTickers(tickerList) == 0) {
 			status.setCompletionMsg("Prices loaded successfully - " + tickerList.size() + " tickers processed");
 			status.setSuccess(true);

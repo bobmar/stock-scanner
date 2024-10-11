@@ -1,10 +1,5 @@
 package org.rhm.stock.controller;
 
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-
 import org.rhm.stock.controller.dto.FileContent;
 import org.rhm.stock.controller.dto.GeneralResponse;
 import org.rhm.stock.controller.dto.TickerInfo;
@@ -20,14 +15,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
 
 @RestController
 public class TickerController {
@@ -74,7 +67,7 @@ public class TickerController {
 		GeneralResponse response = new GeneralResponse();
 		int savedCnt = tickerSvc.saveTickerList(tickerList);
 		response.setRequestDate(new Date());
-		response.setMessageText("Saved " + savedCnt + " tickers");
+		response.setMessageText(String.format("Saved %s tickers", savedCnt));
 		return response;
 	}
 	

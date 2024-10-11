@@ -3,6 +3,11 @@
  */
 package org.rhm.stock.io;
 
+import org.rhm.stock.dto.PriceBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,11 +24,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import org.rhm.stock.dto.PriceBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 
 /**
  * http://ichart.finance.yahoo.com/table.csv?s=INTC&d=3&e=25&f=2013&g=d&a=6&b=9&c=1986&ignore=.csv
@@ -36,6 +36,7 @@ import org.springframework.stereotype.Component;
  * @author bob
  *
  */
+@Deprecated
 @Component
 public class YahooPriceDownloader {
 	private final static String BASE_URL = "https://query1.finance.yahoo.com/v7/finance/download/";

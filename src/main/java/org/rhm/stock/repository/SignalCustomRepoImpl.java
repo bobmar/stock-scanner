@@ -1,8 +1,6 @@
 package org.rhm.stock.repository;
 
-import java.util.Date;
-import java.util.List;
-
+import com.mongodb.client.result.DeleteResult;
 import org.rhm.stock.domain.StockSignal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,17 +10,18 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.data.mongodb.core.query.Query;
 
-import com.mongodb.client.result.DeleteResult;
+import java.util.Date;
+import java.util.List;
 
 public class SignalCustomRepoImpl implements SignalCustomRepo {
 	@Autowired
-	private MongoTemplate mongoTemplate = null;
+	private MongoTemplate mongoTemplate;
 	
-	private Logger logger = LoggerFactory.getLogger(SignalCustomRepoImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SignalCustomRepoImpl.class);
 	@Override
 	public List<StockSignal> findSignalsByType(List<String> signalTypeList, Date priceDate) {
 		CriteriaDefinition crit = Criteria.where("signalType").in(signalTypeList).and("priceDate").gt(priceDate);
-		logger.debug("findSignalsByType - " + crit.getCriteriaObject().toJson());
+		LOGGER.debug("findSignalsByType - {}", crit.getCriteriaObject().toJson());
 		List<StockSignal> signalList = mongoTemplate.find(Query.query(crit), StockSignal.class);
 		return signalList;
 	}
