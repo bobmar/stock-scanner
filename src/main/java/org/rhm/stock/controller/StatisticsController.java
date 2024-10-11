@@ -1,12 +1,5 @@
 package org.rhm.stock.controller;
 
-import java.text.ParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.rhm.stock.controller.dto.GeneralResponse;
 import org.rhm.stock.controller.dto.StatListRequest;
 import org.rhm.stock.controller.dto.StatListResponse;
@@ -21,21 +14,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @CrossOrigin
 @RestController
 public class StatisticsController {
 	@Autowired
-	private StatisticService statSvc = null;
-	private Logger logger = LoggerFactory.getLogger(StatisticsController.class);
+	private StatisticService statSvc;
+	private static final Logger LOGGER = LoggerFactory.getLogger(StatisticsController.class);
 	@RequestMapping(value="/stocks/stat/type", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
 	private GeneralResponse createStatType(@RequestBody StatisticType statType) {
 		GeneralResponse response = new GeneralResponse();
@@ -62,7 +55,7 @@ public class StatisticsController {
 
 	@PostMapping(value="/stocks/stat/datemap")
 	private Map<String,List<StockStatistic>> retrieveStatMapByDate(@RequestBody StatMapRequest request) {
-		logger.debug("retrieveStatMapByDate - " + request.getFromDate() + " through " + request.getToDate() + "/" + request.getStatType());
+		LOGGER.debug("retrieveStatMapByDate - " + request.getFromDate() + " through " + request.getToDate() + "/" + request.getStatType());
 		Map<String,List<StockStatistic>> statMap = statSvc.retrieveStatMap(request.getFromDate(), request.getToDate(), request.getStatType());
 		return statMap;
 	}
@@ -79,10 +72,10 @@ public class StatisticsController {
 				statDate = StockUtil.stringToDate(searchDate);
 			} 
 			catch (ParseException e) {
-				logger.warn("retrieveStatListByDate - " + e.getMessage());
+				LOGGER.warn("retrieveStatListByDate - " + e.getMessage());
 			}
 		}
-		logger.debug("retrieveStatListByDate - statDate=" + statDate.toString());
+		LOGGER.debug("retrieveStatListByDate - statDate=" + statDate.toString());
 		StatListResponse response = new StatListResponse();
 		List<StockStatistic> statList = statSvc.retrieveStatList(statDate, request.getStatCode());
 		List<StockStatistic> returnList = null;
@@ -124,10 +117,10 @@ public class StatisticsController {
 				statDate = StockUtil.stringToDate(searchDate);
 			} 
 			catch (ParseException e) {
-				logger.warn("retrieveBullBearStatList - " + e.getMessage());
+				LOGGER.warn("retrieveBullBearStatList - " + e.getMessage());
 			}
 		}
-		logger.debug("retrieveBullBearStatList - " + statDate.toString() + "/" + request.getStatCode());
+		LOGGER.debug("retrieveBullBearStatList - " + statDate.toString() + "/" + request.getStatCode());
 		List<StockStatistic> statList = statSvc.retrieveStatList(statDate, request.getStatCode());
 		Map<String,List<StockStatistic>> statMap = new HashMap<String,List<StockStatistic>>();
 		if (statList.size() > 24) {

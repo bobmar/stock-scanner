@@ -5,9 +5,9 @@ import java.util.List;
 
 public class KeyStatAggregate {
 
-	private String statKey = null;
-	private String priceDate = null;
-	private String keyStatName = null;
+	private String statKey;
+	private String priceDate;
+	private String keyStatName;
 	private double lowValue = 999999999.9;
 	private double highValue = -999999999.9;
 	private double meanValue = 0.0;

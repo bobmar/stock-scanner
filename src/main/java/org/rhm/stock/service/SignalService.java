@@ -1,25 +1,8 @@
 package org.rhm.stock.service;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.rhm.stock.domain.IbdStatistic;
-import org.rhm.stock.domain.SignalType;
-import org.rhm.stock.domain.SignalTypeCount;
-import org.rhm.stock.domain.StockAveragePrice;
-import org.rhm.stock.domain.StockSignal;
+import org.rhm.stock.domain.*;
 import org.rhm.stock.dto.StockSignalDisplay;
-import org.rhm.stock.repository.AveragePriceRepo;
-import org.rhm.stock.repository.IbdStatisticRepo;
-import org.rhm.stock.repository.SignalRepo;
-import org.rhm.stock.repository.SignalTypeCountRepo;
-import org.rhm.stock.repository.SignalTypeRepo;
+import org.rhm.stock.repository.*;
 import org.rhm.stock.util.StockUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,20 +10,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Service
 public class SignalService {
 	@Autowired
-	private SignalTypeRepo signalTypeRepo = null;
+	private SignalTypeRepo signalTypeRepo;
 	@Autowired
-	private SignalRepo signalRepo = null;
+	private SignalRepo signalRepo;
 	@Autowired
-	private SignalTypeCountRepo sigCntRepo = null;
+	private SignalTypeCountRepo sigCntRepo;
 	@Autowired
-	private IbdStatisticRepo ibdRepo = null;
+	private IbdStatisticRepo ibdRepo;
 	@Autowired
-	private AveragePriceRepo avgPriceRepo = null;
+	private AveragePriceRepo avgPriceRepo;
 
-	private Logger logger = LoggerFactory.getLogger(SignalService.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(SignalService.class);
 	
 	public SignalType createSignalType(SignalType signalType) {
 		SignalType sigType = signalTypeRepo.save(signalType);
@@ -61,7 +48,7 @@ public class SignalService {
 			newSignal = signalRepo.save(signal);
 		}
 		else {
-			logger.debug("createSignal - signal " + signal.getSignalId() + " already exists");
+			LOGGER.debug("createSignal - signal " + signal.getSignalId() + " already exists");
 		}
 		return newSignal;
 	}
@@ -83,7 +70,7 @@ public class SignalService {
 	}
 	
 	public List<StockSignal> findSignalsByType(List<String> signalTypes, int lookBackDays) {
-		logger.debug("findSignalsByType - signalTypes: " + signalTypes.toString() + "; lookBackDays: " + lookBackDays);
+		LOGGER.debug("findSignalsByType - signalTypes: " + signalTypes.toString() + "; lookBackDays: " + lookBackDays);
 		StockSignal latestSignal = this.findMaxDate();
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(latestSignal.getPriceDate());
@@ -102,7 +89,7 @@ public class SignalService {
 			priceDate = StockUtil.stringToDate(priceDateStr);
 		} 
 		catch (ParseException e) {
-			logger.warn("findSignalsByTypeAndDate - " + e.getMessage());
+			LOGGER.warn("findSignalsByTypeAndDate - " + e.getMessage());
 		}
 		signalList = this.findSignalsByTypeAndDate(signalType, priceDate);
 		return this.transformSignalList(signalList, priceDate);
@@ -150,7 +137,7 @@ public class SignalService {
 		for (StockSignal signal: signalList) {
 			tickerList.add(signal.getTickerSymbol());
 		}
-		logger.debug("extractTickerFromSignal - " + tickerList.toString());
+		LOGGER.debug("extractTickerFromSignal - " + tickerList.toString());
 		return tickerList;
 	}
 	
@@ -177,28 +164,28 @@ public class SignalService {
 	}
 	
 	public List<StockSignalDisplay> findSignalsByTypeAndDate(String signalType, String overlaySignalType, String priceDateParam) {
-		logger.debug("findSignalsByTypeAndDate - signalType=" + signalType + "; overlaySignalType=" + overlaySignalType + "; priceDate=" + priceDateParam);
+		LOGGER.debug("findSignalsByTypeAndDate - signalType=" + signalType + "; overlaySignalType=" + overlaySignalType + "; priceDate=" + priceDateParam);
 		List<StockSignal> baseSignalList = null;
 		Date priceDate = null;
 		try {
 			priceDate = StockUtil.stringToDate(priceDateParam);
 		} 
 		catch (ParseException e) {
-			logger.warn("findSignalsByTypeAndDate - parse price date: " + e.getMessage());
+			LOGGER.warn("findSignalsByTypeAndDate - parse price date: " + e.getMessage());
 		}
 		Map<String, IbdStatistic> ibdStatMap = this.latestIbdStats();
 		Map<String, StockAveragePrice> avgPriceMap = this.avgPricesByDate(priceDate);
 		baseSignalList = this.findSignalsByTypeAndDate(signalType, priceDate);
 		List<String> overlayTickerList = null;
 		overlayTickerList =	this.extractTickerFromSignal(this.findSignalsByTypeAndDate(overlaySignalType, priceDate));
-		logger.debug("findSignalsByTypeAndDate - " + overlayTickerList.size() + " tickers found for " + overlaySignalType + " signals");
+		LOGGER.debug("findSignalsByTypeAndDate - " + overlayTickerList.size() + " tickers found for " + overlaySignalType + " signals");
 		List<StockSignalDisplay> mergedSignalList = new ArrayList<StockSignalDisplay>();
 		StockSignalDisplay signalDisplay = null;
 		for (StockSignal signal: baseSignalList) {
 			signalDisplay = new StockSignalDisplay(signal);
 			if (overlayTickerList.contains(signalDisplay.getTickerSymbol())) {
 				signalDisplay.setMultiList(true);
-				logger.debug("findSignalsByTypeAndDate - multiList set to true");
+				LOGGER.debug("findSignalsByTypeAndDate - multiList set to true");
 			}
 			else {
 				signalDisplay.setMultiList(false);
@@ -211,7 +198,7 @@ public class SignalService {
 	}
 	
 	public List<StockSignal> findSignalsByTypeAndDate(String signalType, Date priceDate) {
-		logger.debug("findSignalsByTypeAndDate - signalType:" + signalType + ";priceDate:" + priceDate);
+		LOGGER.debug("findSignalsByTypeAndDate - signalType:" + signalType + ";priceDate:" + priceDate);
 		return signalRepo.findBySignalTypeAndPriceDateOrderByTickerSymbol(signalType, priceDate);
 	}
 	

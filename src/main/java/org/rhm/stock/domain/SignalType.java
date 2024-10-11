@@ -4,8 +4,8 @@ import org.springframework.data.annotation.Id;
 
 public class SignalType {
 	@Id
-	private String signalCode = null;
-	private String signalDesc = null;
+	private String signalCode;
+	private String signalDesc;
 	
 	public String getSignalCode() {
 		return signalCode;

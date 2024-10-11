@@ -7,12 +7,12 @@ import java.time.ZoneId;
 
 public class StockTicker {
 	@Id
-	private String tickerSymbol = null;
-	private String companyName = null;
-	private String refreshPrices = null;
-	private String sectorName = null;
-	private String industryName = null;
-	private Boolean weeklyOptions = false;
+	private String tickerSymbol;
+	private String companyName;
+	private String refreshPrices;
+	private String sectorName;
+	private String industryName;
+	private Boolean weeklyOptions;
 	private LocalDateTime createDate = LocalDateTime.now(ZoneId.of("GMT"));
 	
 	public String getTickerSymbol() {

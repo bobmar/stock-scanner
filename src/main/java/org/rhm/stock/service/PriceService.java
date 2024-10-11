@@ -1,18 +1,9 @@
 package org.rhm.stock.service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.dto.CompositePrice;
 import org.rhm.stock.dto.PriceBean;
 import org.rhm.stock.io.DataDownload;
-import org.rhm.stock.io.YahooPriceDownloader;
 import org.rhm.stock.repository.PriceRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,25 +12,31 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 public class PriceService {
 	@Autowired
-	private PriceRepo priceRepo = null;
+	private PriceRepo priceRepo;
 	@Autowired
-	private CompositePriceService cpSvc = null;
-	@Autowired
-	private YahooPriceDownloader priceDownloader = null;
+	private CompositePriceService cpSvc;
 	@Autowired
 	@Qualifier("fmpDownload")
 	private DataDownload priceDownload;
-	private Logger logger = LoggerFactory.getLogger(PriceService.class);
-	private DateFormat dtFmt = new SimpleDateFormat("yyyy-MM-dd");
+	private final static Logger LOGGER = LoggerFactory.getLogger(PriceService.class);
+	private final DateFormat dtFmt = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public List<StockPrice> retrieveSourcePrices(String tickerSymbol, int days) {
 		List<PriceBean> priceBeanList =
 				this.priceDownload.downloadPrices(tickerSymbol, days);
 		List<StockPrice> priceList = new ArrayList<StockPrice>();
-		logger.debug("retrieveSourcePrices - transforming price beans");
+		LOGGER.debug("retrieveSourcePrices - transforming price beans");
 		for (PriceBean bean: priceBeanList) {
 			StockPrice price = new StockPrice();
 			price.setPriceId(String.format("%s:%s", tickerSymbol, dtFmt.format(bean.getDate())));
@@ -55,7 +52,7 @@ public class PriceService {
 				break;
 			}
 		}
-		logger.debug("retrieveSourcePrices - returning StockPrice entries");
+		LOGGER.debug("retrieveSourcePrices - returning {} StockPrice entries", priceList.size());
 		return priceList;
 	}
 	
@@ -73,7 +70,7 @@ public class PriceService {
 	
 	public List<StockPrice> saveStockPrice(List<StockPrice> priceList) {
 		List<StockPrice> savedPrices = priceRepo.saveAll(priceList);
-		logger.debug("saveStockPrice(List) - saved " + priceList.size() + " prices");
+		LOGGER.debug("saveStockPrice(List) - saved " + priceList.size() + " prices");
 		return savedPrices;
 	}
 	

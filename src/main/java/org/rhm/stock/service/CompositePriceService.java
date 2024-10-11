@@ -1,10 +1,5 @@
 package org.rhm.stock.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.rhm.stock.domain.StockPrice;
 import org.rhm.stock.domain.StockSignal;
 import org.rhm.stock.dto.CompositePrice;
@@ -14,18 +9,23 @@ import org.rhm.stock.repository.StatisticRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Component
 public class CompositePriceService {
 	@Autowired
-	private StatisticRepo statRepo = null;
+	private StatisticRepo statRepo;
 	@Autowired
-	private PriceRepo priceRepo = null;
+	private PriceRepo priceRepo;
 	@Autowired
-	private SignalService signalSvc = null;
+	private SignalService signalSvc;
 	@Autowired
-	private AveragePriceService avgPriceSvc = null;
+	private AveragePriceService avgPriceSvc;
 	@Autowired
-	private IbdStatisticRepo ibdRepo = null;
+	private IbdStatisticRepo ibdRepo;
 	
 	private Map<String, List<StockSignal>> signalListToMap(List<StockSignal> signalList) {
 		Map<String, List<StockSignal>> signalMap = new HashMap<String, List<StockSignal>>();

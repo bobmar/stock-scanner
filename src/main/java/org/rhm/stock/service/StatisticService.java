@@ -1,18 +1,5 @@
 package org.rhm.stock.service;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
-
 import org.rhm.stock.domain.StatisticType;
 import org.rhm.stock.domain.StockStatistic;
 import org.rhm.stock.repository.StatisticRepo;
@@ -23,14 +10,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 @Service
 public class StatisticService {
 	@Autowired
-	private StatisticRepo statRepo = null;
+	private StatisticRepo statRepo;
 	@Autowired
-	private StatisticTypeRepo statTypeRepo = null;
+	private StatisticTypeRepo statTypeRepo;
 	
-	private Logger logger = LoggerFactory.getLogger(StatisticService.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(StatisticService.class);
 	
 	public StockStatistic createStatistic(StockStatistic stat) {
 		return this.createStatistic(stat, true);
@@ -40,15 +33,15 @@ public class StatisticService {
 		StockStatistic newStat = null;
 		if (!statRepo.exists(Example.of(stat))) {
 			newStat = statRepo.save(stat);
-			logger.debug("createStatistic - " + stat.getStatId() + " doesn't exist; created new");
+			LOGGER.debug("createStatistic - " + stat.getStatId() + " doesn't exist; created new");
 		}
 		else {
 			if (forceUpdate) {
 				newStat = statRepo.save(stat);
-				logger.debug("createStatistic - " + stat.getStatId() + " already exists; updated");
+				LOGGER.debug("createStatistic - " + stat.getStatId() + " already exists; updated");
 			}
 			else {
-				logger.debug("createStatistic - " + stat.getStatId() + " already exists and force update not specified; skipping");
+				LOGGER.debug("createStatistic - " + stat.getStatId() + " already exists and force update not specified; skipping");
 			}
 		}
 		return newStat;
@@ -126,7 +119,7 @@ public class StatisticService {
 						.sorted((o1,o2)->{return o1.getStatisticValue().compareTo(o2.getStatisticValue());})
 						.collect(Collectors.toList());
 				statMap.put(df.format(cal.getTime()), statList);
-				logger.debug("retrieveStatMap - added " + cal.getTime() + " to map");
+				LOGGER.debug("retrieveStatMap - added " + cal.getTime() + " to map");
 			}
 			cal.add(Calendar.DAY_OF_MONTH, 1);
 		}

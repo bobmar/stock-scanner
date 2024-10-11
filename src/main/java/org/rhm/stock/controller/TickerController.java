@@ -25,8 +25,8 @@ import java.util.List;
 @RestController
 public class TickerController {
 	@Autowired
-	private TickerService tickerSvc = null;
-	private Logger logger = LoggerFactory.getLogger(TickerController.class);
+	private TickerService tickerSvc;
+	private final static Logger LOGGER = LoggerFactory.getLogger(TickerController.class);
 	@RequestMapping(value="/stocks/ticker/{tickerSymbol}", method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
 	public GeneralResponse createTicker(@PathVariable String tickerSymbol) {
 		GeneralResponse response = new GeneralResponse();
@@ -39,7 +39,7 @@ public class TickerController {
 	@PostMapping(value="/stocks/ticker/upload")
 	public TickerUploadResponse uploadTickers(@RequestBody FileContent file) {
 		TickerUploadResponse response = new TickerUploadResponse();
-		logger.info("uploadTickers - " + file.getFileContent().substring(0, 50));
+		LOGGER.info("uploadTickers - " + file.getFileContent().substring(0, 50));
 		String[] uploadPart = file.getFileContent().split(",");
 		byte[] decodedStr = Base64.getDecoder().decode(uploadPart[1]);
 		List<TickerInfo> tickerInfoList = tickerSvc.retrieveTickerInfo(decodedStr);
@@ -75,7 +75,7 @@ public class TickerController {
 	@GetMapping(value="/stocks/ticker/page")
 	public Page<StockTicker> retrieveTickerPage(Pageable pageable) {
 		Page<StockTicker> tickerPage = tickerSvc.findPage(pageable);
-		logger.debug("retrieveTickerPage - " + pageable.getClass().getName());
+		LOGGER.debug("retrieveTickerPage - " + pageable.getClass().getName());
 		return tickerPage;
 	}
 	

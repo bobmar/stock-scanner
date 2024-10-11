@@ -1,16 +1,16 @@
 package org.rhm.stock.domain;
 
+import org.springframework.data.annotation.Id;
+
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
-
 public class StockAveragePrice {
 	@Id
-	private String priceId = null;
-	private List<AveragePrice> avgList = null;
-	private String tickerSymbol = null;
-	private Date priceDate = null;
+	private String priceId;
+	private List<AveragePrice> avgList;
+	private String tickerSymbol;
+	private Date priceDate;
 	public String getPriceId() {
 		return priceId;
 	}

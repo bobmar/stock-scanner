@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class PriceController {
 	@Autowired
-	private PriceService priceSvc = null;
+	private PriceService priceSvc;
 
 	@GetMapping(value="/stocks/price/latest/{tickerSymbol}")
 	public CompositePrice findLatestPrice(@PathVariable String tickerSymbol) {

@@ -1,12 +1,12 @@
 package org.rhm.stock.domain;
 
 public class AveragePrice {
-	private Integer daysCnt = null;
-	private Integer avgVolume = null;
-	private Double avgPrice = null;
-	private Double emaPrice = null;
-	private Double avgHighLowRange = null;
-	private Double avgOpenCloseRange = null;
+	private Integer daysCnt;
+	private Integer avgVolume;
+	private Double avgPrice;
+	private Double emaPrice;
+	private Double avgHighLowRange;
+	private Double avgOpenCloseRange;
 	public Integer getDaysCnt() {
 		return daysCnt;
 	}

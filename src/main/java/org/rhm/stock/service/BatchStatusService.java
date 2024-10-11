@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BatchStatusService {
 	@Autowired
-	private BatchStatusRepo batchRepo = null;
+	private BatchStatusRepo batchRepo;
 	
 	public BatchStatus saveBatchStatus(BatchStatus batchStatus) {
 		return batchRepo.save(batchStatus);

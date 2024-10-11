@@ -1,10 +1,5 @@
 package org.rhm.stock.service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.rhm.stock.domain.AveragePrice;
 import org.rhm.stock.domain.StockAveragePrice;
 import org.rhm.stock.io.CompanyInfoDownload;
@@ -13,6 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AveragePriceService {
@@ -24,7 +24,8 @@ public class AveragePriceService {
 	public StockAveragePrice createAveragePrice(StockAveragePrice avgPrice) {
 		return avgPriceRepo.save(avgPrice);
 	}
-	
+
+	@Deprecated
 	public StockAveragePrice findAvgPrice(String priceId) {
 		Optional<StockAveragePrice> avgPriceResult = avgPriceRepo.findById(priceId);
 		StockAveragePrice avgPrice = null;

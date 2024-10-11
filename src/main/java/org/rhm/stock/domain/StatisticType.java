@@ -4,9 +4,9 @@ import org.springframework.data.annotation.Id;
 
 public class StatisticType {
 	@Id
-	private String statisticCode = null;
-	private String statisticDesc = null;
-	private String className = null;
+	private String statisticCode;
+	private String statisticDesc;
+	private String className;
 	private Boolean showInDashboard = false;
 	public String getStatisticCode() {
 		return statisticCode;

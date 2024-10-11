@@ -4,10 +4,10 @@ import org.springframework.data.annotation.Id;
 
 public class SignalTypeCount {
 	@Id
-	private String signalCountKey = null;
-	private String signalDate = null;
-	private String signalCode = null;
-	private String signalDesc = null;
+	private String signalCountKey;
+	private String signalDate;
+	private String signalCode;
+	private String signalDesc;
 	private int signalCount = 0;
 	
 	public String getSignalDate() {

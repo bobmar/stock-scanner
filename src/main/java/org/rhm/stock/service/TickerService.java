@@ -49,7 +49,7 @@ public class TickerService {
 		}
 		else {
 			if (tickerRepo.existsById(tickerSymbol)) {
-				message = "Ticker " + tickerSymbol + " already exists";
+				message = String.format("Ticker %s already exists", tickerSymbol);
 			}
 			else {
 				stockTicker = new StockTicker();
@@ -58,7 +58,7 @@ public class TickerService {
 				stockTicker.setIndustryName((String) companyInfo.get("industry"));
 				stockTicker.setSectorName((String) companyInfo.get("sector"));
 				tickerRepo.insert(stockTicker);
-				message = tickerSymbol + "/" + stockTicker.getCompanyName() + " was successfully created";
+				message = String.format("%s/%s was successfully created", tickerSymbol, stockTicker.getCompanyName());
 			}
 		}
 		return message;

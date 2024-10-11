@@ -18,7 +18,7 @@ public class StockSignalDisplay extends StockSignal {
 		this.multiList = multiList;
 	}
 	
-	private IbdStatistic ibdLatestStat = null;
+	private IbdStatistic ibdLatestStat;
 	public IbdStatistic getIbdLatestStat() {
 		return ibdLatestStat;
 	}
@@ -26,7 +26,7 @@ public class StockSignalDisplay extends StockSignal {
 		this.ibdLatestStat = ibdLatestStat;
 	}
 
-	private StockAveragePrice avgPrice = null;
+	private StockAveragePrice avgPrice;
 	public StockAveragePrice getAvgPrice() {
 		return avgPrice;
 	}

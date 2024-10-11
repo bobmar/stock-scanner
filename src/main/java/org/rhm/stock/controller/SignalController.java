@@ -1,9 +1,5 @@
 package org.rhm.stock.controller;
 
-import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-
 import org.rhm.stock.controller.dto.CompositePriceRequest;
 import org.rhm.stock.controller.dto.GeneralResponse;
 import org.rhm.stock.controller.dto.SignalHistRequest;
@@ -20,21 +16,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
 
 @RestController
 public class SignalController {
 	@Autowired
-	private SignalService sigSvc = null;
+	private SignalService sigSvc;
 	@Autowired
-	private CompositePriceService cPriceSvc = null;
-	private Logger logger = LoggerFactory.getLogger(SignalController.class);
+	private CompositePriceService cPriceSvc;
+	private static final Logger LOGGER = LoggerFactory.getLogger(SignalController.class);
 	@RequestMapping(value="/stocks/signal/type", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
 	public GeneralResponse createSignalType(@RequestBody SignalType signalType) {
 		GeneralResponse response = new GeneralResponse();
@@ -61,7 +55,7 @@ public class SignalController {
 			signalDate = StockUtil.dateToString(sigSvc.findMaxDate().getPriceDate());
 		}
 		else {
-			logger.debug(request.getSignalDate().toString());
+			LOGGER.debug(request.getSignalDate().toString());
 		}
 		return sigSvc.findSignalsByTypeAndDate(request.getSignalType(), signalDate);
 	}

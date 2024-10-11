@@ -1,23 +1,19 @@
 package org.rhm.stock.dto;
 
+import org.rhm.stock.domain.*;
+
 import java.util.List;
 import java.util.Map;
 
-import org.rhm.stock.domain.IbdStatistic;
-import org.rhm.stock.domain.StockAveragePrice;
-import org.rhm.stock.domain.StockPrice;
-import org.rhm.stock.domain.StockSignal;
-import org.rhm.stock.domain.StockStatistic;
-
 public class CompositePrice {
-	private String priceId = null;
-	private String tickerSymbol = null;
-	private StockPrice price = null;
-	private List<StockStatistic> statisticList = null;
-	private List<StockSignal> signalList = null;
-	private List<StockAveragePrice> avgPrices = null;
-	private List<IbdStatistic> ibdStatList = null;
-	private Map<String,List<StockSignal>> histSignals = null;
+	private String priceId;
+	private String tickerSymbol;
+	private StockPrice price;
+	private List<StockStatistic> statisticList;
+	private List<StockSignal> signalList;
+	private List<StockAveragePrice> avgPrices;
+	private List<IbdStatistic> ibdStatList;
+	private Map<String,List<StockSignal>> histSignals;
 	
 	public String getPriceId() {
 		return priceId;

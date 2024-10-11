@@ -1,7 +1,5 @@
 package org.rhm.stock.controller;
 
-import java.util.Date;
-
 import org.rhm.stock.batch.BatchJob;
 import org.rhm.stock.batch.BatchStatus;
 import org.rhm.stock.controller.dto.GeneralResponse;
@@ -14,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
+
 @RestController
 public class BatchController {
 	@Autowired
@@ -22,17 +22,17 @@ public class BatchController {
 	
 	@Autowired
 	@Qualifier("avgPriceCalc")
-	private BatchJob avgPriceCalc = null;
+	private BatchJob avgPriceCalc;
 
 	@Autowired
 	@Qualifier("statsCalcJob")
-	private BatchJob statsCalcJob = null;
+	private BatchJob statsCalcJob;
 	
 	@Autowired
 	@Qualifier("signalScan")
-	private BatchJob signalScanJob = null;
+	private BatchJob signalScanJob;
 	
-	private Logger logger = LoggerFactory.getLogger(BatchController.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(BatchController.class);
 
 	@RequestMapping(value="/stocks/batch/price", method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
 	public GeneralResponse startPriceLoader() {
@@ -41,7 +41,7 @@ public class BatchController {
 		response.setRequestDate(new Date());
 		response.setMessageText("Trigger the price loader");
 		response.setMessageCode("200");
-		logger.debug("startPriceLoader - return response");
+		LOGGER.debug("startPriceLoader - return response");
 		return response;
 	}
 	
@@ -52,7 +52,7 @@ public class BatchController {
 		response.setRequestDate(new Date());
 		response.setMessageText("Trigger the average price calculator");
 		response.setMessageCode("200");
-		logger.debug("startAvgPriceCalc - return response");
+		LOGGER.debug("startAvgPriceCalc - return response");
 		return response;
 	}
 	
@@ -63,7 +63,7 @@ public class BatchController {
 		response.setRequestDate(new Date());
 		response.setMessageText("Trigger the statistics calculator");
 		response.setMessageCode("200");
-		logger.debug("startStatsCalc - return response");
+		LOGGER.debug("startStatsCalc - return response");
 		return response;
 	}
 	
@@ -74,7 +74,7 @@ public class BatchController {
 		response.setRequestDate(new Date());
 		response.setMessageText("Trigger the signal scanner");
 		response.setMessageCode("200");
-		logger.debug("startSignalScan - return response");
+		LOGGER.debug("startSignalScan - return response");
 		return response;
 	}
 }

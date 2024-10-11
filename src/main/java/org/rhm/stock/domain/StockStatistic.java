@@ -1,17 +1,17 @@
 package org.rhm.stock.domain;
 
-import java.util.Date;
-
 import org.springframework.data.annotation.Id;
+
+import java.util.Date;
 
 public class StockStatistic {
 	@Id
-	private String statId = null;
-	private String priceId = null;
-	private String statisticType = null;
-	private Double statisticValue = null;
-	private String tickerSymbol = null;
-	private Date priceDate = null;
+	private String statId;
+	private String priceId;
+	private String statisticType;
+	private Double statisticValue;
+	private String tickerSymbol;
+	private Date priceDate;
 	
 	public StockStatistic() {
 		

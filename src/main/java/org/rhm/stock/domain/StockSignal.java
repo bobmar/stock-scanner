@@ -1,21 +1,21 @@
 package org.rhm.stock.domain;
 
-import java.util.Date;
-
 import org.springframework.data.annotation.Id;
+
+import java.util.Date;
 
 public class StockSignal {
 	@Id
-	private String signalId = null;
-	private String signalType = null;
-	private String priceId = null;
-	private String tickerSymbol = null;
-	private Date priceDate = null;
-	private Double closePrice = null;
-	private Double openPrice = null;
-	private Double lowPrice = null;
-	private Double highPrice = null;
-	private Long volume = null;
+	private String signalId;
+	private String signalType;
+	private String priceId;
+	private String tickerSymbol;
+	private Date priceDate;
+	private Double closePrice;
+	private Double openPrice;
+	private Double lowPrice;
+	private Double highPrice;
+	private Long volume;
 	
 	public StockSignal() {
 		
