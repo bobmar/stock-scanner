@@ -12,7 +12,7 @@ public class StockTicker {
 	private String refreshPrices;
 	private String sectorName;
 	private String industryName;
-	private Boolean weeklyOptions;
+	private Boolean weeklyOptions = Boolean.FALSE;
 	private LocalDateTime createDate = LocalDateTime.now(ZoneId.of("GMT"));
 	
 	public String getTickerSymbol() {

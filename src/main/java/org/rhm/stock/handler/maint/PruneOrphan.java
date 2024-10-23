@@ -1,50 +1,41 @@
 package org.rhm.stock.handler.maint;
 
-import java.util.Date;
-import java.util.List;
-
-import org.rhm.stock.service.AveragePriceService;
-import org.rhm.stock.service.KeyStatService;
-import org.rhm.stock.service.PriceService;
-import org.rhm.stock.service.SignalService;
-import org.rhm.stock.service.StatisticService;
-import org.rhm.stock.service.TickerService;
+import org.rhm.stock.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+import java.util.List;
+
 @Component
 @Qualifier("pruneOrphan")
 public class PruneOrphan implements MaintHandler {
 	@Autowired
-	private PriceService priceSvc = null;
+	private PriceService priceSvc;
 	@Autowired
-	private TickerService tickerSvc = null;
+	private TickerService tickerSvc;
 	@Autowired
-	private AveragePriceService avgPriceSvc = null;
+	private AveragePriceService avgPriceSvc;
 	@Autowired
-	private SignalService signalSvc = null;
+	private SignalService signalSvc;
 	@Autowired
-	private StatisticService statSvc = null;
-	@Autowired
-	private KeyStatService keyStatSvc = null;
-	private Logger logger = LoggerFactory.getLogger(PruneOrphan.class);
+	private StatisticService statSvc;
+	private final static Logger LOGGER = LoggerFactory.getLogger(PruneOrphan.class);
 
 	private void removeOrphans(String tickerSymbol) {
 		long delPrices = priceSvc.deleteByTickerSymbol(tickerSymbol);
-		logger.info("removeOrphans - deleted " + delPrices + " price records for ticker " + tickerSymbol);
+		LOGGER.info("removeOrphans - deleted {} price records for ticker {}", delPrices, tickerSymbol);
 		long avgPrices = avgPriceSvc.deleteByTickerSymbol(tickerSymbol);
-		logger.info("removeOrphans - deleted " + avgPrices + " average price records for ticker " + tickerSymbol);
+		LOGGER.info("removeOrphans - deleted {} average price records for ticker {}", avgPrices, tickerSymbol);
 		long signals = signalSvc.deleteByTickerSymbol(tickerSymbol);
-		logger.info("removeOrphans - deleted " + signals + " signal records for ticker " + tickerSymbol);
+		LOGGER.info("removeOrphans - deleted {} signal records for ticker {}", signals, tickerSymbol);
 		long stats = statSvc.deleteByTickerSymbol(tickerSymbol);
-		logger.info("removeOrphans - deleted " + stats + " statistic records for ticker " + tickerSymbol);
+		LOGGER.info("removeOrphans - deleted {} statistic records for ticker {}", stats, tickerSymbol);
 		long ibdStats = tickerSvc.deleteIbdStatsByTicker(tickerSymbol);
-		logger.info("removeOrphans - deleted " + ibdStats + " IBD stat records for ticker " + tickerSymbol);
-		long keyStats = keyStatSvc.deleteByTickerSymbol(tickerSymbol);
-		logger.info("removeOrphans - deleted " + keyStats + " Yahoo key stat records for ticker " + tickerSymbol);
+		LOGGER.info("removeOrphans - deleted {} IBD stat records for ticker {}", ibdStats, tickerSymbol);
 	}
 	
 	private void processTickers(List<String> tickerSymbolList) {
@@ -58,17 +49,16 @@ public class PruneOrphan implements MaintHandler {
 	@Override
 	public void prune(Date deleteBefore) {
 		List<String> tickerSymbolList = priceSvc.findPriceTickers(deleteBefore);
-		logger.info("prune - found " + tickerSymbolList.size() + " price tickers");
+		LOGGER.info("prune - found {} price tickers", tickerSymbolList.size());
 		this.processTickers(tickerSymbolList);
 		tickerSymbolList = avgPriceSvc.findAvgPriceTickers(deleteBefore);
-		logger.info("prune - found " + tickerSymbolList.size() + " average price tickers");
+		LOGGER.info("prune - found {} average price tickers", tickerSymbolList.size());
 		this.processTickers(tickerSymbolList);
 		tickerSymbolList = signalSvc.findSignalTickers(deleteBefore);
-		logger.info("prune - found " + tickerSymbolList.size() + " signal tickers");
+		LOGGER.info("prune - found {} signal tickers", tickerSymbolList.size());
 		this.processTickers(tickerSymbolList);
 		tickerSymbolList = statSvc.findStatTickers(deleteBefore);
-		logger.info("prune - found " + tickerSymbolList.size() + " statistic tickers");
+		LOGGER.info("prune - found {} statistic tickers", tickerSymbolList.size());
 		this.processTickers(tickerSymbolList);
 	}
-
 }

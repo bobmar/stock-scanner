@@ -33,15 +33,15 @@ public class StatisticService {
 		StockStatistic newStat = null;
 		if (!statRepo.exists(Example.of(stat))) {
 			newStat = statRepo.save(stat);
-			LOGGER.debug("createStatistic - " + stat.getStatId() + " doesn't exist; created new");
+			LOGGER.debug("createStatistic - {} doesn't exist; created new", stat.getStatId());
 		}
 		else {
 			if (forceUpdate) {
 				newStat = statRepo.save(stat);
-				LOGGER.debug("createStatistic - " + stat.getStatId() + " already exists; updated");
+				LOGGER.debug("createStatistic - {} already exists; updated", stat.getStatId());
 			}
 			else {
-				LOGGER.debug("createStatistic - " + stat.getStatId() + " already exists and force update not specified; skipping");
+				LOGGER.debug("createStatistic - {} already exists and force update not specified; skipping", stat.getStatId());
 			}
 		}
 		return newStat;
@@ -70,7 +70,7 @@ public class StatisticService {
 	public StockStatistic retrieveStat(String tickerSymbol, String statisticType, Date priceDate) {
 		List<StockStatistic> statList = statRepo.findByTickerSymbolAndStatisticTypeAndPriceDate(tickerSymbol, statisticType, priceDate);
 		StockStatistic stat = null;
-		if (statList.size() > 0) {
+		if (!statList.isEmpty()) {
 			stat = statList.get(0);
 		}
 		return stat;
@@ -86,12 +86,8 @@ public class StatisticService {
 		Map<String, List<StockStatistic>> statMap = new HashMap<String, List<StockStatistic>>();
 		List<StockStatistic> fullStatList = this.retrieveStatList(tickerSymbol), currStatList = null;
 		for (StockStatistic stat: fullStatList) {
-			currStatList = statMap.get(stat.getPriceId());
-			if (currStatList == null) {
-				currStatList = new ArrayList<StockStatistic>();
-				statMap.put(stat.getPriceId(), currStatList);
-			}
-			currStatList.add(stat);
+      currStatList = statMap.computeIfAbsent(stat.getPriceId(), k -> new ArrayList<StockStatistic>());
+      currStatList.add(stat);
 		}
 		return statMap;
 	}

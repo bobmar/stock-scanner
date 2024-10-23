@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class AveragePriceService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AveragePriceService.class);
 	@Autowired
-	private AveragePriceRepo avgPriceRepo = null;
+	private AveragePriceRepo avgPriceRepo;
 	@Autowired
 	private CompanyInfoDownload coInfo;
 	public StockAveragePrice createAveragePrice(StockAveragePrice avgPrice) {
