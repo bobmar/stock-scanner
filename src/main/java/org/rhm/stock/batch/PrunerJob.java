@@ -1,58 +1,54 @@
 package org.rhm.stock.batch;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import org.rhm.stock.handler.maint.MaintHandler;
+import org.rhm.stock.handler.maint.*;
 import org.rhm.stock.service.BatchStatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Component
 @Qualifier("pruner")
 public class PrunerJob implements BatchJob {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PrunerJob.class);
 	@Autowired
 	@Qualifier("pruneAvgPrice")
-	private MaintHandler avgPrice = null;
+	private MaintHandler avgPrice;
 	@Autowired
 	@Qualifier("prunePrice")
-	private MaintHandler price = null;
+	private MaintHandler price;
 	@Autowired
 	@Qualifier("pruneSignal")
-	private MaintHandler signal = null;
+	private MaintHandler signal;
 	@Autowired
 	@Qualifier("pruneStat")
-	private MaintHandler stat = null;
+	private MaintHandler stat;
 	@Autowired
 	@Qualifier("pruneIbdStat")
-	private MaintHandler ibdStat = null;
-	@Autowired
-	@Qualifier("pruneKeyStat")
-	private MaintHandler keyStat = null;
+	private MaintHandler ibdStat;
 	@Autowired
 	@Qualifier("pruneOrphan")
-	private MaintHandler orphan = null;
+	private MaintHandler orphan;
 	@Autowired
-	private BatchStatusService batchStatSvc = null;
-	private Logger logger = LoggerFactory.getLogger(PrunerJob.class);
+	private BatchStatusService batchStatSvc;
 	private List<MaintHandler> prunerList = null;
-	
+
+	@Autowired
+	private ApplicationContext ctx;
+
 	private List<MaintHandler> createPrunerList() {
 		List<MaintHandler> prunerList = new ArrayList<MaintHandler>();
-		prunerList.add(avgPrice);
-		prunerList.add(price);
-		prunerList.add(signal);
-		prunerList.add(stat);
-		prunerList.add(ibdStat);
-		prunerList.add(keyStat);
-		prunerList.add(orphan);
+		prunerList.add(ctx.getBean(PruneAvgPrice.class));
+		prunerList.add(ctx.getBean(PrunePrice.class));
+		prunerList.add(ctx.getBean(PruneSignal.class));
+		prunerList.add(ctx.getBean(PruneStatistic.class));
+		prunerList.add(ctx.getBean(PruneIbdStat.class));
+		prunerList.add(ctx.getBean(PruneOrphan.class));
 		return prunerList;
 	}
 
@@ -68,7 +64,7 @@ public class PrunerJob implements BatchJob {
 		this.prunerList = this.createPrunerList();
 		Date deleteBefore = calcDeleteBefore(365);
 		for (MaintHandler pruner: prunerList) {
-			logger.info("run - delete records older than " + deleteBefore.toString());
+			LOGGER.info("run - delete records older than " + deleteBefore.toString());
 			pruner.prune(deleteBefore);
 		}
 		status.setCompletionMsg("Successfully pruned collections");
