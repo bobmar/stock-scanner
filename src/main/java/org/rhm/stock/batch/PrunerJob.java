@@ -36,9 +36,8 @@ public class PrunerJob implements BatchJob {
 	private MaintHandler orphan;
 	@Autowired
 	private BatchStatusService batchStatSvc;
-	private List<MaintHandler> prunerList = null;
 
-	@Autowired
+  @Autowired
 	private ApplicationContext ctx;
 
 	private List<MaintHandler> createPrunerList() {
@@ -61,7 +60,7 @@ public class PrunerJob implements BatchJob {
 	@Override
 	public BatchStatus run() {
 		BatchStatus status = new BatchStatus(PrunerJob.class);
-		this.prunerList = this.createPrunerList();
+    List<MaintHandler> prunerList = this.createPrunerList();
 		Date deleteBefore = calcDeleteBefore(365);
 		for (MaintHandler pruner: prunerList) {
 			LOGGER.info("run - delete records older than " + deleteBefore.toString());

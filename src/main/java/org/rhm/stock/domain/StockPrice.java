@@ -58,7 +58,7 @@ public class StockPrice {
 		return volume;
 	}
 	public Double getDollarVolume() {
-		return this.volume * this.closePrice.doubleValue();
+		return this.volume * this.closePrice;
 	}
 	public void setVolume(Long volume) {
 		this.volume = volume;
@@ -75,22 +75,22 @@ public class StockPrice {
 	}
 
 	public Double getHighLowRange() {
-		BigDecimal result = BigDecimal.valueOf(highPrice.doubleValue() - lowPrice.doubleValue()).round(new MathContext(3));
+		BigDecimal result = BigDecimal.valueOf(highPrice - lowPrice).round(new MathContext(3));
 		return result.doubleValue();
 	}
 	
 	public Double getOpenCloseRange() {
-		BigDecimal result = BigDecimal.valueOf(closePrice.doubleValue() - openPrice.doubleValue()).round(new MathContext(3));
+		BigDecimal result = BigDecimal.valueOf(closePrice - openPrice).round(new MathContext(3));
 		return result.doubleValue();
 	}
 	
 	public Double getHighLowVsClosePct() {
 		BigDecimal result = null;
 		try {
-			result = BigDecimal.valueOf(((getHighLowRange() / closePrice.doubleValue()) * 100)).round(new MathContext(3));
+			result = BigDecimal.valueOf(((getHighLowRange() / closePrice) * 100)).round(new MathContext(3));
 		}
 		catch (NumberFormatException e) {
-			result = new BigDecimal(0.0);
+			result = new BigDecimal("0.0");
 		}
 		return result.doubleValue();
 	}
@@ -101,7 +101,7 @@ public class StockPrice {
 			result = BigDecimal.valueOf(((getOpenCloseRange() / getHighLowRange()) * 100)).round(new MathContext(3));
 		}
 		catch (NumberFormatException e) {
-			result = new BigDecimal(0.0);
+			result = new BigDecimal("0.0");
 		}
 		return result.doubleValue();
 	}
@@ -109,10 +109,10 @@ public class StockPrice {
 	public Double getCloseVsLowDiffPct() {
 		BigDecimal result = null;
 		try {
-			result = BigDecimal.valueOf((((closePrice.doubleValue() - lowPrice.doubleValue()) / lowPrice.doubleValue()) * 100)).round(new MathContext(3));
+			result = BigDecimal.valueOf((((closePrice - lowPrice) / lowPrice) * 100)).round(new MathContext(3));
 		}
 		catch (NumberFormatException e) {
-			result = new BigDecimal(0.0);
+			result = new BigDecimal("0.0");
 		}
 		return result.doubleValue();
 	}
@@ -120,18 +120,20 @@ public class StockPrice {
 	public Double getCloseVsHighDiffPct() {
 		BigDecimal result = null;
 		try {
-			result = BigDecimal.valueOf((((highPrice.doubleValue() - closePrice.doubleValue()) / highPrice.doubleValue()) * 100)).round(new MathContext(3));
+			result = BigDecimal.valueOf((((highPrice - closePrice) / highPrice) * 100)).round(new MathContext(3));
 		}
 		catch (NumberFormatException e) {
-			result = new BigDecimal(0.0);
+			result = new BigDecimal("0.0");
 		}
 		return result.doubleValue();
 	}
 	
 	public boolean equals(Object o) {
 		boolean isEqual = false;
-		if (this.toString().equals(((StockPrice)o).toString())) {
-			isEqual = true;
+		if (o instanceof StockPrice) {
+			if (this.toString().equals(((StockPrice)o).toString())) {
+				isEqual = true;
+			}
 		}
 		return isEqual;
 	}
