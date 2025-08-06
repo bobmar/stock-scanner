@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * 2025-01-25: added IBD average true range. Substituting open price for prior day close.
+ */
 @Service
 public class PriceService {
 	@Autowired
@@ -47,6 +50,7 @@ public class PriceService {
 			price.setPriceDate(bean.getDate());
 			price.setTickerSymbol(tickerSymbol);
 			price.setVolume(bean.getVolume());
+			price.setAvgTrueRange(price.getHighLowRange()/price.getOpenPrice());
 			priceList.add(price);
 			if (priceList.size() >= days) {
 				break;
@@ -85,7 +89,7 @@ public class PriceService {
 	
 	public StockPrice findStockPrice(String priceId) {
 		Optional<StockPrice> opt = priceRepo.findById(priceId);
-		return opt.isPresent()?opt.get():null;
+		return opt.orElse(null);
 	}
 	
 	public StockPrice findLatestStockPrice(String tickerSymbol) {
@@ -94,7 +98,6 @@ public class PriceService {
 	}
 	
 	public long deleteOlderThan(Date deleteBefore) {
-//		return priceRepo.deleteOlderThan(deleteBefore);
 		return priceRepo.deleteByPriceDateBefore(deleteBefore);
 	}
 	

@@ -16,6 +16,8 @@ public class StockPrice {
 	private Double lowPrice;
 	private Double highPrice;
 	private Long volume;
+	private Double avgTrueRange;
+
 	public StockPrice() {}
 	
 	public String getTickerSymbol() {
@@ -69,7 +71,13 @@ public class StockPrice {
 	public void setPriceId(String priceId) {
 		this.priceId = priceId;
 	}
-	
+	public Double getAvgTrueRange() {
+		return avgTrueRange;
+	}
+	public void setAvgTrueRange(Double avgTrueRange) {
+		this.avgTrueRange = avgTrueRange;
+	}
+
 	public String toString() {
 		return this.tickerSymbol + ":" + this.priceDate;
 	}
