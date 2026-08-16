@@ -24,6 +24,7 @@ public class FinancialGrowthLoader implements BatchJob {
   private TickerService tickerService;
   @Autowired
   private BatchStatusService batchStatSvc;
+
   private int processTicker(String tickerSymbol) {
     List<FinancialGrowth> financialGrowthList = this.finModelService.downloadFinancialGrowth(tickerSymbol);
     if (!financialGrowthList.isEmpty()) {

@@ -2,9 +2,11 @@ package org.rhm.stock.service;
 
 import org.rhm.stock.domain.FinancialGrowth;
 import org.rhm.stock.domain.FinancialRatio;
+import org.rhm.stock.domain.FinancialScore;
 import org.rhm.stock.io.DataDownload;
 import org.rhm.stock.repository.FinancialGrowthRepo;
 import org.rhm.stock.repository.FinancialRatioRepo;
+import org.rhm.stock.repository.FinancialScoreRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,8 @@ public class FinancialRatioService {
   private FinancialRatioRepo ratioRepo;
   @Autowired
   private FinancialGrowthRepo growthRepo;
+    @Autowired
+    private FinancialScoreRepo scoreRepo;
   @Autowired
   private DataDownload download;
   public void saveRatios(List<FinancialRatio> ratioList) {
@@ -25,6 +29,7 @@ public class FinancialRatioService {
   public void saveGrowthList(List<FinancialGrowth> finGrowthList) {
     growthRepo.saveAll(finGrowthList);
   }
+  public void saveScoreList(List<FinancialScore> finScoreList) {scoreRepo.saveAll(finScoreList);}
   public List<FinancialRatio> retrieve(String tickerSymbol) {
     return ratioRepo.findBySymbolOrderByDate(tickerSymbol);
   }
@@ -34,5 +39,9 @@ public class FinancialRatioService {
 
   public List<FinancialGrowth> downloadFinancialGrowth(String tickerSymbol) {
     return download.retrieveFinancialGrowth(tickerSymbol);
+  }
+
+  public List<FinancialScore> downloadFinancialScore(String tickerSymbol) {
+      return download.retrieveFinancialScore(tickerSymbol);
   }
 }

@@ -57,6 +57,9 @@ public class StockDataLoader implements CommandLineRunner {
 			case "FINGROWTH":
 				jobList.add(ctx.getBean(FinancialGrowthLoader.class));
 				break;
+            case "FINSCORE":
+                jobList.add(ctx.getBean(FinancialScoreLoader.class));
+                break;
 			case "EMAPRICE":
 				jobList.add(ctx.getBean(EmaPriceLoader.class));
 				break;

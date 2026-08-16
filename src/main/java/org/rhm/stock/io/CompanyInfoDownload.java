@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.rhm.stock.domain.FinancialGrowth;
 import org.rhm.stock.domain.FinancialRatio;
+import org.rhm.stock.domain.FinancialScore;
 import org.rhm.stock.domain.KeyMetric;
 import org.rhm.stock.dto.PriceBean;
 import org.slf4j.Logger;
@@ -34,6 +35,8 @@ public class CompanyInfoDownload implements DataDownload {
     private String apiKey;
     @Value(value = "${company.download.baseurl}")
     private String baseUrl;
+    @Value(value = "${company.download.stable}")
+    private String stableUrl;
     @Value(value = "${company.download.profile}")
     private String profileUri;
     @Value(value = "${company.download.ratios}")
@@ -46,9 +49,12 @@ public class CompanyInfoDownload implements DataDownload {
     private String finGrowthUri;
     @Value(value = "${company.download.techind}" )
     private String techIndUri;
+    @Value(value = "${company.download.fin-scores}")
+    private String finScoresUri;
+
     private final ObjectMapper mapper = new ObjectMapper();
     private String createUrl(String baseUrl, String endpointUri, String tickerSymbol) {
-        String fullUrl = baseUrl + endpointUri;
+        String fullUrl = String.format("%s%s", baseUrl, endpointUri);
         return String.format(fullUrl, tickerSymbol, apiKey);
     }
 
@@ -57,22 +63,27 @@ public class CompanyInfoDownload implements DataDownload {
         return String.format(fullUrl, tickerSymbol, fromDate, toDate, apiKey);
     }
 
-    public String createProfileUrl(String tickerSymbol) {
+    private String createProfileUrl(String tickerSymbol) {
         return this.createUrl(this.baseUrl, this.profileUri, tickerSymbol);
     }
 
-    public String createRatioUrl(String tickerSymbol) {
+    private String createRatioUrl(String tickerSymbol) {
       return this.createUrl(this.baseUrl, this.ratiosUri, tickerSymbol);
     }
 
-    public String createEmaUrl(String tickerSymbol, String period) {
+    private String createEmaUrl(String tickerSymbol, String period) {
       return this.createTechIndUrl(tickerSymbol, "1day", "ema", period);
     }
 
-    public String createTechIndUrl(String tickerSymbol, String timeFrame, String type, String period) {
+    private String createTechIndUrl(String tickerSymbol, String timeFrame, String type, String period) {
       String techIndUri = String.format(this.techIndUri, timeFrame, tickerSymbol, type, period, this.apiKey);
       return String.format("%s%s", this.baseUrl, techIndUri);
     }
+
+    private String concatSymbolUrl(String baseUrl, String tickerSymbol, String uri) {
+        return this.createUrl(baseUrl, uri, tickerSymbol);
+    }
+
   private PriceBean createPriceBean(String priceDate, Map<String,Object> priceData) {
     StringBuilder builder = new StringBuilder();
     builder.append(priceDate);
@@ -270,6 +281,45 @@ public class CompanyInfoDownload implements DataDownload {
       LOGGER.error(e.getMessage());
     }
     return emaResult;
+  }
+
+  private HttpRequest createHttpRequest(String uriStr) {
+      System.out.println(String.format("CompanyInfoDownload.createHttpRequest - uriStr: %s", uriStr));
+      URI uri = URI.create(uriStr);
+      HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
+      return request;
+  }
+
+    private List<FinancialScore> transformFinScore(List<Map<String,Object>> result) {
+        List<FinancialScore> finScoreList = new ArrayList<>();
+        result.forEach(item ->{
+            FinancialScore finScore = mapper.convertValue(item, FinancialScore.class);
+            finScore.setId(String.format("%s:%s", finScore.getSymbol(), LocalDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_DATE)));
+            finScoreList.add(finScore);
+        });
+        return finScoreList;
+    }
+
+
+    public List<FinancialScore> retrieveFinancialScore(String tickerSymbol) {
+        HttpRequest request = this.createHttpRequest(this.concatSymbolUrl(this.stableUrl, tickerSymbol, this.finScoresUri));
+        System.out.println(request.uri());
+        HttpClient client = HttpClient.newHttpClient();
+        List<Map<String,Object>> finScoreResult;
+        List<FinancialScore> finScoreList = null;
+      try {
+          HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+           LOGGER.debug(String.format("CompanyInfoDownload.retrieveFinancialScore - HTTP response: %s", response.statusCode()));
+          if (response.statusCode() == 200) {
+              System.out.println(response.body());
+              finScoreResult = mapper.readValue(response.body(), List.class);
+              finScoreList = this.transformFinScore(finScoreResult);
+          }
+
+      } catch (IOException | InterruptedException e) {
+          LOGGER.error(e.getMessage());
+      }
+      return finScoreList;
   }
 
 }

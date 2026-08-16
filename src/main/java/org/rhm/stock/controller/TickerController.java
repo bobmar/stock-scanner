@@ -17,6 +17,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -89,6 +93,7 @@ public class TickerController {
 		GeneralResponse response = new GeneralResponse();
 		int weeklyCnt = tickerSvc.updateWeeklyOptions();
 		response.setMessageText(String.format("Found %s tickers having weekly options", weeklyCnt));
+        response.setRequestDate(Date.from(Instant.now()));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

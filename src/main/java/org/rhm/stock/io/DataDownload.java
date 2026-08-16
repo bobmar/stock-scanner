@@ -2,6 +2,7 @@ package org.rhm.stock.io;
 
 import org.rhm.stock.domain.FinancialGrowth;
 import org.rhm.stock.domain.FinancialRatio;
+import org.rhm.stock.domain.FinancialScore;
 import org.rhm.stock.domain.KeyMetric;
 import org.rhm.stock.dto.PriceBean;
 
@@ -14,4 +15,5 @@ public interface DataDownload {
   public List<FinancialRatio> retrieveFinancialRatios(String tickerSymbol);
   public List<KeyMetric> retrieveKeyMetrics(String tickerSymbol);
   public List<FinancialGrowth> retrieveFinancialGrowth(String tickerSymbol);
+  public List<FinancialScore> retrieveFinancialScore(String tickerSymbol);
 }
