@@ -28,7 +28,7 @@ public class FinancialScoreLoader implements BatchJob {
 
     private int processTicker(String tickerSymbol) {
         List<FinancialScore> financialScoreList = this.finModelService.downloadFinancialScore(tickerSymbol);
-        if (!financialScoreList.isEmpty()) {
+        if (null != financialScoreList && !financialScoreList.isEmpty()) {
             LOGGER.info("processTicker - saving financial score for {}", tickerSymbol);
             finModelService.saveScoreList(financialScoreList);
         }
